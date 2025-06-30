@@ -2,17 +2,19 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import './index.css';
 import App from './App.tsx';
-import '@fontsource/roboto/300.css';
-import '@fontsource/roboto/400.css';
-import '@fontsource/roboto/500.css';
-import '@fontsource/roboto/700.css';
-import { Provider } from 'react-redux';
-import { store } from './store/store.ts';
+import { createCtx } from '@reatom/core';
+import { reatomContext } from '@reatom/npm-react';
+import { ThemeProvider } from '@mui/material/styles';
+import theme from './setup/theme.ts';
+
+const ctx = createCtx();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <Provider store={store}>
-      <App />
-    </Provider>
+    <reatomContext.Provider value={ctx}>
+      <ThemeProvider theme={theme}>
+        <App />
+      </ThemeProvider>
+    </reatomContext.Provider>
   </StrictMode>
 );
