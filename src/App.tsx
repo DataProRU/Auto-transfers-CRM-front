@@ -1,31 +1,31 @@
-import reactLogo from './assets/react.svg';
-import viteLogo from '/vite.svg';
-import './App.css';
-import { Counter } from './components/Counter';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Auth from './pages/Auth/Auth';
+import Home from './pages/Home/Home';
+import { useEffect } from 'react';
+import { observer } from 'mobx-react-lite';
+import { authStore } from './store/AuthStore';
+import CircularProgress from '@mui/material/CircularProgress';
 
-function App() {
+const App = observer(() => {
+  const { checkAuth, isAuthChecking, isAuth } = authStore;
+
+  useEffect(() => {
+    checkAuth();
+  }, [checkAuth]);
+
+  if (isAuthChecking) {
+    return <CircularProgress />;
+  }
+
   return (
     <>
-      <div>
-        <a href='https://vite.dev' target='_blank'>
-          <img src={viteLogo} className='logo' alt='Vite logo' />
-        </a>
-        <a href='https://react.dev' target='_blank'>
-          <img src={reactLogo} className='logo react' alt='React logo' />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className='card'>
-        <Counter />
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className='read-the-docs'>
-        Click on the Vite and React logos to learn more
-      </p>
+      <Router>
+        <Routes>
+          <Route path='/' element={isAuth ? <Home /> : <Auth />} />
+        </Routes>
+      </Router>
     </>
   );
-}
+});
 
 export default App;
