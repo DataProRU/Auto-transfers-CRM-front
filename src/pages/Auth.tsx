@@ -1,8 +1,6 @@
-import z from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useNavigate } from 'react-router-dom';
-import { authStore } from '../../store/AuthStore';
 import { useEffect } from 'react';
 import Container from '@mui/material/Container';
 import Paper from '@mui/material/Paper';
@@ -11,14 +9,10 @@ import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
-import { useNotification } from '../../providers/Notification';
-
-const authSchema = z.object({
-  login: z.string().min(1, 'Логин обязятелен для заполенения'),
-  password: z.string().min(6, 'Пароль должен состоянить минимум из 8 символов'),
-});
-
-type AuthFormData = z.infer<typeof authSchema>;
+import { useNotification } from '../providers/Notification';
+import { authStore } from '../store/AuthStore';
+import { authSchema } from '../schemas/auth';
+import type { AuthFormData } from '../@types/auth';
 
 const Auth = () => {
   const { showNotification } = useNotification();

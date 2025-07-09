@@ -1,19 +1,29 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Auth from './pages/Auth/Auth';
-import Home from './pages/Home/Home';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { authStore } from './store/AuthStore';
 import CircularProgress from '@mui/material/CircularProgress';
+import Loading from './pages/Logist/Loading';
+import Start from './pages/Logist/Start';
+import CarTransporter from './pages/Logist/CarTrasporter';
+import EditRequests from './pages/Logist/EditRequests';
+import ProtectedRoute from './components/Page/ProtectedRoute';
+import Header from './components/Header/Header';
+import Auth from './pages/Auth';
 
 const App = observer(() => {
-  const { checkAuth, isAuthChecking, isAuth } = authStore;
+  const { checkAuth, isAuthChecking } = authStore;
+  const [isInitialCheckComplete, setIsInitialCheckComplete] = useState(false);
 
   useEffect(() => {
-    checkAuth();
+    const initializeAuth = async () => {
+      await checkAuth();
+      setIsInitialCheckComplete(true);
+    };
+    initializeAuth();
   }, [checkAuth]);
 
-  if (isAuthChecking) {
+  if (!isInitialCheckComplete || isAuthChecking) {
     return <CircularProgress />;
   }
 
@@ -21,7 +31,44 @@ const App = observer(() => {
     <>
       <Router>
         <Routes>
-          <Route path='/' element={isAuth ? <Home /> : <Auth />} />
+          <Route path='/auth' element={<Auth />} />
+          <Route
+            path='/'
+            element={
+              <ProtectedRoute requiredRoles='logistician'>
+                <Header />
+                <Start />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path='/loading'
+            element={
+              <ProtectedRoute requiredRoles='logistician'>
+                <Header />
+                <Loading />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path='/transporters'
+            element={
+              <ProtectedRoute requiredRoles='logistician'>
+                <Header />
+                <CarTransporter />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path='/edit'
+            element={
+              <ProtectedRoute requiredRoles='logistician'>
+                <Header />
+                <EditRequests />
+              </ProtectedRoute>
+            }
+          />
         </Routes>
       </Router>
     </>

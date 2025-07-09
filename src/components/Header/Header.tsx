@@ -1,4 +1,3 @@
-import LogistHeader from './LogistHeader/LogistHeader';
 import RequestPageIcon from '@mui/icons-material/RequestPage';
 import Logout from '@mui/icons-material/Logout';
 import { authStore } from '../../store/AuthStore';
@@ -11,6 +10,8 @@ import List from '@mui/material/List';
 import MenuItem from '@mui/material/MenuItem';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
+import { useNavigate } from 'react-router-dom';
+import LogistHeader from './LogistHeader';
 
 const drawerWidth = 300;
 
@@ -31,9 +32,11 @@ const getRole = (role: string) => {
 
 const Header = () => {
   const { role, logout } = authStore;
+  const navigate = useNavigate();
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
+    navigate('/auth');
   };
 
   return (

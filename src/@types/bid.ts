@@ -1,0 +1,6 @@
+import type z from 'zod';
+import type { bidFormSchema, rejectBidFormSchema } from '../schemas/bid';
+
+export type BidFormData = z.infer<typeof bidFormSchema>;
+
+export type RejectBidFormData = z.infer<typeof rejectBidFormSchema>;
