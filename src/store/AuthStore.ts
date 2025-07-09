@@ -129,7 +129,7 @@ class AuthStore {
       this.logout();
       return false;
     } finally {
-      this.setIsAuthChecking(true);
+      this.setIsAuthChecking(false);
     }
   };
 
