@@ -4,7 +4,7 @@ import type { ReactNode } from 'react';
 
 interface ProtectedRouteProps {
   children: ReactNode;
-  requiredRoles: string;
+  requiredRoles: string[];
 }
 
 const ProtectedRoute = ({ children, requiredRoles }: ProtectedRouteProps) => {
@@ -14,7 +14,7 @@ const ProtectedRoute = ({ children, requiredRoles }: ProtectedRouteProps) => {
     return <Navigate to='/auth' replace />;
   }
 
-  if (requiredRoles && role !== requiredRoles) {
+  if (requiredRoles && !requiredRoles.includes(role!)) {
     return <Navigate to='/' replace />;
   }
 

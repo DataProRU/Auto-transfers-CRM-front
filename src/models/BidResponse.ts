@@ -24,4 +24,6 @@ export interface Bid {
   approved_by_inspector: boolean;
   approved_by_title: boolean;
   approved_by_re_export: boolean;
+  opened?: boolean;
+  manager_comment?: string | null;
 }
