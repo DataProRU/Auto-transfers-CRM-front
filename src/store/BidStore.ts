@@ -1,8 +1,12 @@
 import { makeAutoObservable } from 'mobx';
-import type { Bid } from '../models/BidResponse';
 import { getAPIErrorMessage } from '../utils/getAPIErrorMessage';
 import BidService from '../services/BidService';
-import type { BidFormData, RejectBidFormData } from '../@types/bid';
+import type {
+  BidFormData,
+  OpeningManagerBidFormData,
+  RejectBidFormData,
+} from '../@types/bid';
+import type { Bid } from '../models/BidResponse';
 
 class BidStore {
   bid: Bid | null = null;
@@ -38,7 +42,7 @@ class BidStore {
   fetchBids = async () => {
     try {
       this.setIsBidLoaging(true);
-      const response = await BidService.getLogisticianBids();
+      const response = await BidService.getBids();
 
       const unTouched = response.data.untouched;
       this.setuntouchedBids(unTouched);
@@ -58,7 +62,7 @@ class BidStore {
     try {
       this.setIsBidLoaging(true);
       this.setBidError(null);
-      await BidService.changeLogisticianBid(id, data);
+      await BidService.changeBid(id, data);
 
       if (data.transit_method !== null) {
         const movedBid = this.untouchedBids.find((bid) => bid.id === id);
@@ -102,12 +106,63 @@ class BidStore {
     }
   };
 
+  openningManagerUpdateBid = async (
+    id: number,
+    data: OpeningManagerBidFormData
+  ) => {
+    try {
+      this.setIsBidLoaging(true);
+      this.setBidError(null);
+      await BidService.changeBid(id, data);
+      if (data.openning_date !== null) {
+        const movedBid = this.untouchedBids.find((bid) => bid.id === id);
+        if (movedBid) {
+          const updatedUntouched = this.untouchedBids.filter(
+            (bid) => bid.id !== id
+          );
+          this.setuntouchedBids(updatedUntouched);
+
+          this.setInProgressBids([
+            ...this.inProgressBids,
+            { ...movedBid, ...data },
+          ]);
+        } else {
+          const updatedInProgress = this.inProgressBids.map((bid) =>
+            bid.id === id ? { ...bid, ...data } : bid
+          );
+          this.setInProgressBids(updatedInProgress);
+        }
+      } else {
+        const movedBid = this.inProgressBids.find((bid) => bid.id === id);
+        if (movedBid) {
+          const updatedInProgress = this.inProgressBids.filter(
+            (bid) => bid.id !== id
+          );
+          this.setInProgressBids(updatedInProgress);
+
+          this.setuntouchedBids([
+            ...this.untouchedBids,
+            { ...movedBid, ...data },
+          ]);
+        }
+      }
+
+      return true;
+    } catch (e) {
+      const message = getAPIErrorMessage(e);
+      this.setBidError(message);
+      return false;
+    } finally {
+      this.setIsBidLoaging(false);
+    }
+  };
+
   rejectBid = async (id: number, data: RejectBidFormData) => {
     try {
       this.setIsBidLoaging(true);
       this.setBidError(null);
 
-      const response = await BidService.rejectLogisticianBid(id, data);
+      const response = await BidService.rejectBid(id, data);
       if (response.data.transit_method !== null) {
         const updatedInProgress = this.inProgressBids.filter(
           (bid) => bid.id !== id
