@@ -5,13 +5,13 @@ import { authStore } from './store/AuthStore';
 import CircularProgress from '@mui/material/CircularProgress';
 import ProtectedRoute from './components/Page/ProtectedRoute';
 import Header from './components/Header/Header';
+import DefaultRequests from './pages/DefaultRequests';
 
 const Loading = lazy(() => import('./pages/Logist/Loading'));
-const Start = lazy(() => import('./pages/Logist/Start'));
 const CarTransporter = lazy(() => import('./pages/Logist/CarTrasporter'));
 const EditRequests = lazy(() => import('./pages/Logist/EditRequests'));
 const Auth = lazy(() => import('./pages/Auth'));
-const Request = lazy(() => import('./pages/OpeningManager/Requests'));
+const TitleRequests = lazy(() => import('./pages/Title/TitleRequests'));
 
 const App = observer(() => {
   const { checkAuth, isAuthChecking, role } = authStore;
@@ -29,6 +29,8 @@ const App = observer(() => {
     return <CircularProgress />;
   }
 
+  const DefaultRequestsRoles = ['logistician', 'opening_manager', 'inspector'];
+
   return (
     <>
       <Router>
@@ -39,10 +41,19 @@ const App = observer(() => {
               path='/'
               element={
                 <ProtectedRoute
-                  requiredRoles={['logistician', 'opening_manager']}
+                  requiredRoles={[
+                    'logistician',
+                    'opening_manager',
+                    'title',
+                    'inspector',
+                  ]}
                 >
                   <Header />
-                  {role == 'logistician' ? <Start /> : <Request />}
+                  {DefaultRequestsRoles.includes(role!) ? (
+                    <DefaultRequests />
+                  ) : (
+                    <TitleRequests />
+                  )}
                 </ProtectedRoute>
               }
             />

@@ -1,7 +1,9 @@
 import type {
   BidFormData,
+  InspectorBidFormData,
   OpeningManagerBidFormData,
   RejectBidFormData,
+  TitleBidFormData,
 } from '../@types/bid';
 import $api from '../setup/axios';
 
@@ -14,7 +16,11 @@ class BidService {
 
   static async changeBid(
     id: number,
-    data: BidFormData | OpeningManagerBidFormData
+    data:
+      | BidFormData
+      | OpeningManagerBidFormData
+      | TitleBidFormData
+      | InspectorBidFormData
   ) {
     return $api.put(`/autotrips/bids/${id}/`, data, {
       headers: { 'Content-Type': 'application/json' },

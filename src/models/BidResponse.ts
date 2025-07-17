@@ -1,10 +1,5 @@
 import type { Client } from './UserResponse';
 
-export interface BidData {
-  untouched: Bid[];
-  in_progress: Bid[];
-}
-
 export interface Bid {
   id: number;
   client: Client;
@@ -24,6 +19,19 @@ export interface Bid {
   approved_by_inspector: boolean;
   approved_by_title: boolean;
   approved_by_re_export: boolean;
-  opened?: boolean;
-  manager_comment?: string | null;
+  opened: boolean;
+  manager_comment: string | null;
+  pickup_address: string | null;
+  title_collection_date: string | null;
+  took_title: string | null;
+  notified_logisticial_by_title: boolean;
+  notified_logisticial_by_inspector: boolean;
+  acceptance_date: string | null;
+  transit_number: string | null;
+  inspection_done: string | null;
+  inspection_date: string | null;
+  number_sent: boolean;
+  number_sent_date: string | null;
+  inspection_paid: boolean;
+  inspector_comment: string | null;
 }

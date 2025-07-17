@@ -1,9 +1,9 @@
-import type { RejectBidFormData } from '../../@types/bid';
-import { rejectBidFormSchema } from '../../schemas/bid';
+import type { RejectBidFormData } from '../../../@types/bid';
+import { rejectBidFormSchema } from '../../../schemas/bid';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import bidStore from '../../store/BidStore';
-import { useNotification } from '../../providers/Notification';
+import bidStore from '../../../store/BidStore';
+import { useNotification } from '../../../providers/Notification';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';

@@ -1,13 +1,17 @@
 import ListItem from '@mui/material/ListItem';
 import type { Bid } from '../../../models/BidResponse';
 import { useState } from 'react';
-import LogistBidModal from '../LogistBidModal';
+import LogistBidModal from '../BidModal/LogistBidModal';
 import bidStore from '../../../store/BidStore';
 import { observer } from 'mobx-react-lite';
 import { authStore } from '../../../store/AuthStore';
-import OpeningManagerBidModal from '../OpeningManagerBidModal';
+import OpeningManagerBidModal from '../BidModal/OpeningManagerBidModal';
 import LogistBidInfo from './LogistBidInfo';
 import OpeningManagerBidInfo from './OpeningManagerBidInfo';
+import TitleBidInfo from './TitleBidInfo';
+import TitleBidModal from '../BidModal/TitleBidModal';
+import InspectorBidInfo from './InspectorBidInfo';
+import InspectorBidModal from '../BidModal/InspectorBidModal';
 
 interface BidListItemProps {
   bid: Bid;
@@ -60,14 +64,22 @@ const BidListItem = observer(({ bid }: BidListItemProps) => {
       >
         {role === 'logistician' ? (
           <LogistBidInfo bid={bid} />
-        ) : (
+        ) : role === 'opening_manager' ? (
           <OpeningManagerBidInfo bid={bid} />
+        ) : role === 'title' ? (
+          <TitleBidInfo bid={bid} />
+        ) : (
+          <InspectorBidInfo bid={bid} />
         )}
       </ListItem>
       {role === 'logistician' ? (
         <LogistBidModal open={open} onClose={handleClose} />
-      ) : (
+      ) : role === 'opening_manager' ? (
         <OpeningManagerBidModal open={open} onClose={handleClose} />
+      ) : role === 'title' ? (
+        <TitleBidModal open={open} onClose={handleClose} />
+      ) : (
+        <InspectorBidModal open={open} onClose={handleClose} />
       )}
     </>
   );

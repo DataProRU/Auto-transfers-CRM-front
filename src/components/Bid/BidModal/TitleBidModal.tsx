@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
-import { useNotification } from '../../providers/Notification';
-import bidStore from '../../store/BidStore';
+import { useNotification } from '../../../providers/Notification';
+import bidStore from '../../../store/BidStore';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
@@ -12,32 +12,29 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Typography from '@mui/material/Typography';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import TextField from '@mui/material/TextField';
-import moment from 'moment';
 import { Controller, useForm } from 'react-hook-form';
-import type { OpeningManagerBidFormData } from '../../@types/bid';
+import type { TitleBidFormData } from '../../../@types/bid';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { OpeningManagerBidFormSchema } from '../../schemas/bid';
+import { TitleBidFormSchema } from '../../../schemas/bid';
 import DialogActions from '@mui/material/DialogActions';
 import Button from '@mui/material/Button';
-import { getTransitMethod } from '../../utils/getTransitMethod';
-import BidCheckbox from './BidCheckBox';
+import BidCheckbox from '../BidCheckBox';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { ruRU } from '@mui/x-date-pickers/locales';
+import FormControl from '@mui/material/FormControl';
+import InputLabel from '@mui/material/InputLabel';
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
+import moment from 'moment';
 
-moment.locale('ru');
-
-interface OpeningManagerModalProps {
+interface TitleModalProps {
   open: boolean;
   onClose: () => void;
 }
 
-const OpeningManagerBidModal = ({
-  open,
-  onClose,
-}: OpeningManagerModalProps) => {
-  const { bid, openningManagerUpdateBid, bidError } = bidStore;
+const TitleBidModal = ({ open, onClose }: TitleModalProps) => {
+  const { bid, updateTitleBid, bidError } = bidStore;
   const { showNotification } = useNotification();
 
   const {
@@ -46,12 +43,13 @@ const OpeningManagerBidModal = ({
     formState: { errors },
     control,
     reset,
-  } = useForm<OpeningManagerBidFormData>({
-    resolver: zodResolver(OpeningManagerBidFormSchema),
+  } = useForm<TitleBidFormData>({
+    resolver: zodResolver(TitleBidFormSchema),
     defaultValues: {
-      openning_date: moment(bid?.openning_date).format('DD.MM.YYYY') || '',
-      manager_comment: bid?.manager_comment || '',
-      opened: bid?.opened || false,
+      pickup_address: bid?.pickup_address || '',
+      took_title: bid?.took_title || '',
+      notified_logisticial_by_title:
+        bid?.notified_logisticial_by_title || false,
     },
   });
 
@@ -64,23 +62,24 @@ const OpeningManagerBidModal = ({
   useEffect(() => {
     if (bid) {
       reset({
-        openning_date: moment(bid?.openning_date).format('DD.MM.YYYY') || '',
-        manager_comment: bid?.manager_comment || '',
-        opened: bid?.opened || false,
+        pickup_address: bid?.pickup_address || '',
+        took_title: bid?.took_title || '',
+        notified_logisticial_by_title:
+          bid?.notified_logisticial_by_title || false,
       });
     }
   }, [bid, reset]);
 
-  const onSubmit = async (data: OpeningManagerBidFormData) => {
-    console.log(data);
+  const onSubmit = async (data: TitleBidFormData) => {
     if (bid) {
-      const convertedData = {
+      const payload = {
         ...data,
-        openning_date: moment(data.openning_date, 'DD.MM.YYYY').format(
-          'YYYY-MM-DD'
-        ),
+        title_collection_date:
+          data.took_title === 'yes' || data.took_title === 'consignment'
+            ? moment().format('YYYY-MM-DD')
+            : null,
       };
-      const isSuccess = await openningManagerUpdateBid(bid.id, convertedData);
+      const isSuccess = await updateTitleBid(bid.id, payload);
       if (isSuccess) {
         showNotification('Данные успешно изменены!', 'success');
         onClose();
@@ -151,84 +150,65 @@ const OpeningManagerBidModal = ({
                       disabled
                       value={bid?.vin}
                     />
-
                     <TextField
-                      label='Номер контейнера'
-                      id='fatherName'
+                      label='Комментарий менеджера'
+                      id='reason'
                       variant='outlined'
                       disabled
-                      value={bid?.container_number}
-                    />
-                    <TextField
-                      label='Предпологаемая дата прибытия контейнера'
-                      id='arrivalDate'
-                      variant='outlined'
-                      disabled
-                      value={moment(bid?.arrival_date).format('DD.MM.YYYY')}
-                    />
-                    <TextField
-                      label='Получатель'
-                      id='recipient'
-                      variant='outlined'
-                      disabled
-                      value={bid?.recipient}
-                    />
-                    <TextField
-                      label='Перевозчик'
-                      id='transporter'
-                      variant='outlined'
-                      disabled
-                      value={bid?.transporter}
-                    />
-                    <TextField
-                      label='Метод тразита'
-                      id='transit_method'
-                      variant='outlined'
-                      disabled
-                      value={getTransitMethod(bid?.transit_method || '')}
+                      multiline
+                      maxRows={4}
+                      value={bid?.manager_comment || ''}
                     />
                   </Stack>
                 </AccordionDetails>
               </Accordion>
-              <Controller
-                name='openning_date'
-                control={control}
-                render={({ field, fieldState: { error } }) => (
-                  <DatePicker
-                    label='Предполагаемая дата открытия контейнера'
-                    value={
-                      field.value ? moment(field.value, 'DD.MM.YYYY') : null
-                    }
-                    onChange={(date) => {
-                      field.onChange(date?.format('DD.MM.YYYY') || '');
-                    }}
-                    format='DD.MM.YYYY'
-                    slotProps={{
-                      textField: {
-                        error: !!error,
-                        helperText: error?.message || ' ',
-                        fullWidth: true,
-                      },
-                    }}
-                  />
-                )}
-              />
               <TextField
-                id='reason'
-                label='Комментарий'
+                id='comment'
+                label='Адрес забора'
                 multiline
                 maxRows={4}
-                {...register('manager_comment')}
-                error={!!errors.manager_comment}
-                helperText={errors.manager_comment?.message}
+                {...register('pickup_address')}
+                error={!!errors.pickup_address}
+                helperText={errors.pickup_address?.message}
+              />
+              <FormControl fullWidth>
+                <InputLabel id='took_title'>Забрал тайтл</InputLabel>
+                <Select
+                  labelId='took_title'
+                  id='took_title'
+                  label='Забрал тайтл'
+                  {...register('took_title')}
+                  defaultValue={bid?.took_title || 'no'}
+                >
+                  <MenuItem value={'no'}>Нет</MenuItem>
+                  <MenuItem value={'yes'}>Да</MenuItem>
+                  <MenuItem value={'consignment'}>Коносамент</MenuItem>
+                </Select>
+                {errors.took_title && (
+                  <Typography color='error' variant='caption'>
+                    {errors.took_title.message}
+                  </Typography>
+                )}
+              </FormControl>
+              <TextField
+                label='Дата забора тайтла'
+                id='title_collection_date'
+                variant='outlined'
+                fullWidth
+                disabled
+                value={
+                  bid?.title_collection_date
+                    ? moment(bid?.title_collection_date).format('DD.MM.YYYY')
+                    : 'Не указана'
+                }
               />
               <Controller
-                name='opened'
+                name='notified_logisticial_by_title'
                 control={control}
                 render={({ field }) => (
                   <BidCheckbox
                     checked={field.value || false}
-                    label='Открыто'
+                    label='Уведомил логиста'
                     onChange={field.onChange}
                   />
                 )}
@@ -247,4 +227,4 @@ const OpeningManagerBidModal = ({
   );
 };
 
-export default OpeningManagerBidModal;
+export default TitleBidModal;

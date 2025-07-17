@@ -3,8 +3,10 @@ import { getAPIErrorMessage } from '../utils/getAPIErrorMessage';
 import BidService from '../services/BidService';
 import type {
   BidFormData,
+  InspectorBidFormData,
   OpeningManagerBidFormData,
   RejectBidFormData,
+  TitleBidFormData,
 } from '../@types/bid';
 import type { Bid } from '../models/BidResponse';
 
@@ -14,6 +16,7 @@ class BidStore {
   bidError: string | null = null;
   untouchedBids: Bid[] | [] = [];
   inProgressBids: Bid[] | [] = [];
+  сompletedBids: Bid[] | [] = [];
 
   setBid(bid: Bid | null) {
     this.bid = bid;
@@ -35,6 +38,10 @@ class BidStore {
     this.inProgressBids = inProgressBids;
   }
 
+  setCompletedBids(completedBids: Bid[] | []) {
+    this.сompletedBids = completedBids;
+  }
+
   constructor() {
     makeAutoObservable(this, {}, { autoBind: true });
   }
@@ -49,6 +56,10 @@ class BidStore {
 
       const inProgress = response.data.in_progress;
       this.setInProgressBids(inProgress);
+
+      if (response.data.completed) {
+        this.setCompletedBids(response.data.completed);
+      }
     } catch (e) {
       const message = getAPIErrorMessage(e);
       this.setBidError(message);
@@ -58,13 +69,17 @@ class BidStore {
     }
   };
 
-  updateBid = async (id: number, data: BidFormData) => {
+  updateBid = async (
+    id: number,
+    data: BidFormData | OpeningManagerBidFormData | InspectorBidFormData,
+    field: unknown
+  ) => {
     try {
       this.setIsBidLoaging(true);
       this.setBidError(null);
       await BidService.changeBid(id, data);
 
-      if (data.transit_method !== null) {
+      if (field !== null) {
         const movedBid = this.untouchedBids.find((bid) => bid.id === id);
         if (movedBid) {
           const updatedUntouched = this.untouchedBids.filter(
@@ -106,33 +121,67 @@ class BidStore {
     }
   };
 
-  openningManagerUpdateBid = async (
-    id: number,
-    data: OpeningManagerBidFormData
-  ) => {
+  updateTitleBid = async (id: number, data: TitleBidFormData) => {
     try {
       this.setIsBidLoaging(true);
       this.setBidError(null);
       await BidService.changeBid(id, data);
-      if (data.openning_date !== null) {
-        const movedBid = this.untouchedBids.find((bid) => bid.id === id);
-        if (movedBid) {
-          const updatedUntouched = this.untouchedBids.filter(
-            (bid) => bid.id !== id
-          );
-          this.setuntouchedBids(updatedUntouched);
 
-          this.setInProgressBids([
-            ...this.inProgressBids,
-            { ...movedBid, ...data },
-          ]);
+      // Проверяем условия для перемещения между списками
+      if (data.notified_logisticial_by_title === true) {
+        // Если took_title равен 'yes' или 'consignment', перемещаем в completedBids
+        if (data.took_title === 'yes' || data.took_title === 'consignment') {
+          const movedBid =
+            this.untouchedBids.find((bid) => bid.id === id) ||
+            this.inProgressBids.find((bid) => bid.id === id);
+
+          if (movedBid) {
+            // Удаляем из untouchedBids если там был
+            const updatedUntouched = this.untouchedBids.filter(
+              (bid) => bid.id !== id
+            );
+            this.setuntouchedBids(updatedUntouched);
+
+            // Удаляем из inProgressBids если там был
+            const updatedInProgress = this.inProgressBids.filter(
+              (bid) => bid.id !== id
+            );
+            this.setInProgressBids(updatedInProgress);
+
+            // Добавляем в completedBids
+            this.setCompletedBids([
+              ...this.сompletedBids,
+              { ...movedBid, ...data },
+            ]);
+          } else {
+            // Обновляем в completedBids если bid уже там
+            const updatedCompleted = this.сompletedBids.map((bid) =>
+              bid.id === id ? { ...bid, ...data } : bid
+            );
+            this.setCompletedBids(updatedCompleted);
+          }
         } else {
-          const updatedInProgress = this.inProgressBids.map((bid) =>
-            bid.id === id ? { ...bid, ...data } : bid
-          );
-          this.setInProgressBids(updatedInProgress);
+          // Просто notified_logisticial_by_title = true - перемещаем в inProgressBids
+          const movedBid = this.untouchedBids.find((bid) => bid.id === id);
+          if (movedBid) {
+            const updatedUntouched = this.untouchedBids.filter(
+              (bid) => bid.id !== id
+            );
+            this.setuntouchedBids(updatedUntouched);
+
+            this.setInProgressBids([
+              ...this.inProgressBids,
+              { ...movedBid, ...data },
+            ]);
+          } else {
+            const updatedInProgress = this.inProgressBids.map((bid) =>
+              bid.id === id ? { ...bid, ...data } : bid
+            );
+            this.setInProgressBids(updatedInProgress);
+          }
         }
       } else {
+        // Если notified_logisticial_by_title не true, перемещаем обратно в untouchedBids
         const movedBid = this.inProgressBids.find((bid) => bid.id === id);
         if (movedBid) {
           const updatedInProgress = this.inProgressBids.filter(
@@ -146,7 +195,6 @@ class BidStore {
           ]);
         }
       }
-
       return true;
     } catch (e) {
       const message = getAPIErrorMessage(e);

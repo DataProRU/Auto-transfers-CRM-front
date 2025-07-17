@@ -2,7 +2,7 @@ import z from 'zod';
 
 export const bidFormSchema = z.object({
   transit_method: z.string().nonempty('Метод транзита обязателен'),
-  location: z.string().optional(),
+  location: z.string().nonempty('Местоположение обязателено'),
   requested_title: z.boolean().optional(),
   notified_parking: z.boolean().optional(),
   notified_inspector: z.boolean().optional(),
@@ -25,4 +25,19 @@ export const OpeningManagerBidFormSchema = z.object({
     }, 'Некорректная дата'),
   opened: z.boolean().optional(),
   manager_comment: z.string().optional(),
+});
+
+export const TitleBidFormSchema = z.object({
+  pickup_address: z.string().nonempty('Не указан адрес забора'),
+  took_title: z.string(),
+  notified_logisticial_by_title: z.boolean().optional(),
+});
+
+export const InspectorBidFormSchema = z.object({
+  transit_number: z.string().nonempty('Транзитный номер обязательный'),
+  inspection_done: z.string(),
+  notified_logisticial_by_title: z.boolean().optional(),
+  number_sent: z.boolean().optional(),
+  inspection_paid: z.boolean().optional(),
+  inspector_comment: z.string().optional(),
 });

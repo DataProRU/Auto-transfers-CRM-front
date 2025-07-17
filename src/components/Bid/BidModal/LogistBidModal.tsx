@@ -6,24 +6,24 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
-import bidStore from '../../store/BidStore';
+import bidStore from '../../../store/BidStore';
 import moment from 'moment';
 import FormControl from '@mui/material/FormControl';
 import InputLabel from '@mui/material/InputLabel';
 import Select from '@mui/material/Select';
 import { useEffect, useState } from 'react';
 import MenuItem from '@mui/material/MenuItem';
-import BidCheckbox from './BidCheckBox';
+import BidCheckbox from '../BidCheckBox';
 import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Typography from '@mui/material/Typography';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import { Controller, useForm, useWatch } from 'react-hook-form';
-import type { BidFormData } from '../../@types/bid';
+import type { BidFormData } from '../../../@types/bid';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { bidFormSchema } from '../../schemas/bid';
-import { useNotification } from '../../providers/Notification';
+import { bidFormSchema } from '../../../schemas/bid';
+import { useNotification } from '../../../providers/Notification';
 import RejectBidModal from './RejectBidModal';
 
 interface LogistBidModalProps {
@@ -81,7 +81,7 @@ const LogistBidModal = ({ open, onClose }: LogistBidModalProps) => {
   const onSubmit = async (data: BidFormData) => {
     console.log(data);
     if (bid) {
-      const isSuccess = await updateBid(bid.id, data);
+      const isSuccess = await updateBid(bid.id, data, data.transit_method);
       if (isSuccess) {
         showNotification('Данные успешно изменены!', 'success');
         onClose();
