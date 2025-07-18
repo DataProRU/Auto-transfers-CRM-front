@@ -37,7 +37,7 @@ const OpeningManagerBidModal = ({
   open,
   onClose,
 }: OpeningManagerModalProps) => {
-  const { bid, updateBid, bidError } = bidStore;
+  const { bid, updateBid, bidError, setBidError } = bidStore;
   const { showNotification } = useNotification();
 
   const {
@@ -58,8 +58,9 @@ const OpeningManagerBidModal = ({
   useEffect(() => {
     if (bidError) {
       showNotification(bidError, 'error');
+      setBidError(null);
     }
-  }, [bidError, showNotification]);
+  }, [bidError, showNotification, setBidError]);
 
   useEffect(() => {
     if (bid) {

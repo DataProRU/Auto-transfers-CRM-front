@@ -30,13 +30,13 @@ export const OpeningManagerBidFormSchema = z.object({
 export const TitleBidFormSchema = z.object({
   pickup_address: z.string().nonempty('Не указан адрес забора'),
   took_title: z.string(),
-  notified_logisticial_by_title: z.boolean().optional(),
+  notified_logistician_by_title: z.boolean().optional(),
 });
 
 export const InspectorBidFormSchema = z.object({
   transit_number: z.string().nonempty('Транзитный номер обязательный'),
   inspection_done: z.string(),
-  notified_logisticial_by_title: z.boolean().optional(),
+  notified_logistician_by_inspector: z.boolean().optional(),
   number_sent: z.boolean().optional(),
   inspection_paid: z.boolean().optional(),
   inspector_comment: z.string().optional(),

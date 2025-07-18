@@ -34,7 +34,7 @@ interface InspectorModalProps {
 }
 
 const InspectorBidModal = ({ open, onClose }: InspectorModalProps) => {
-  const { bid, updateBid, bidError } = bidStore;
+  const { bid, updateBid, bidError, setBidError } = bidStore;
   const { showNotification } = useNotification();
 
   const {
@@ -51,14 +51,17 @@ const InspectorBidModal = ({ open, onClose }: InspectorModalProps) => {
       number_sent: bid?.number_sent || false,
       inspection_paid: bid?.inspection_paid || false,
       inspector_comment: bid?.inspector_comment || '',
+      notified_logistician_by_inspector:
+        bid?.notified_logistician_by_inspector || false,
     },
   });
 
   useEffect(() => {
     if (bidError) {
       showNotification(bidError, 'error');
+      setBidError(null);
     }
-  }, [bidError, showNotification]);
+  }, [bidError, showNotification, setBidError]);
 
   useEffect(() => {
     if (bid) {
@@ -68,6 +71,8 @@ const InspectorBidModal = ({ open, onClose }: InspectorModalProps) => {
         number_sent: bid?.number_sent || false,
         inspection_paid: bid?.inspection_paid || false,
         inspector_comment: bid?.inspector_comment || '',
+        notified_logistician_by_inspector:
+          bid?.notified_logistician_by_inspector || false,
       });
     }
   }, [bid, reset]);
@@ -81,7 +86,11 @@ const InspectorBidModal = ({ open, onClose }: InspectorModalProps) => {
         number_sent_date:
           data.number_sent === true ? moment().format('YYYY-MM-DD') : null,
       };
-      const isSuccess = await updateBid(bid.id, payload, data.transit_number);
+      const isSuccess = await updateBid(
+        bid.id,
+        payload,
+        data.notified_logistician_by_inspector
+      );
       if (isSuccess) {
         showNotification('Данные успешно изменены!', 'success');
         onClose();
@@ -248,6 +257,17 @@ const InspectorBidModal = ({ open, onClose }: InspectorModalProps) => {
                 {...register('inspector_comment')}
                 error={!!errors.inspector_comment}
                 helperText={errors.inspector_comment?.message}
+              />
+              <Controller
+                name='notified_logistician_by_inspector'
+                control={control}
+                render={({ field }) => (
+                  <BidCheckbox
+                    checked={field.value || false}
+                    label='Уведомил логиста'
+                    onChange={field.onChange}
+                  />
+                )}
               />
             </Stack>
           </LocalizationProvider>

@@ -13,6 +13,7 @@ import TextField from '@mui/material/TextField';
 import DialogActions from '@mui/material/DialogActions';
 import Button from '@mui/material/Button';
 import { observer } from 'mobx-react-lite';
+import { useEffect } from 'react';
 
 interface RejectBidModalProps {
   open: boolean;
@@ -20,7 +21,7 @@ interface RejectBidModalProps {
 }
 
 const RejectBidModal = observer(({ open, onClose }: RejectBidModalProps) => {
-  const { bid, rejectBid, bidError } = bidStore;
+  const { bid, rejectBid, bidError, setBidError } = bidStore;
   const { showNotification } = useNotification();
 
   const {
@@ -30,6 +31,13 @@ const RejectBidModal = observer(({ open, onClose }: RejectBidModalProps) => {
   } = useForm<RejectBidFormData>({
     resolver: zodResolver(rejectBidFormSchema),
   });
+
+  useEffect(() => {
+    if (bidError) {
+      showNotification(bidError, 'error');
+      setBidError(null);
+    }
+  }, [bidError, showNotification, setBidError]);
 
   const onSubmit = async (data: RejectBidFormData) => {
     if (bid) {

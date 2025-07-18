@@ -24,8 +24,8 @@ export interface Bid {
   pickup_address: string | null;
   title_collection_date: string | null;
   took_title: string | null;
-  notified_logisticial_by_title: boolean;
-  notified_logisticial_by_inspector: boolean;
+  notified_logistician_by_title: boolean;
+  notified_logistician_by_inspector: boolean;
   acceptance_date: string | null;
   transit_number: string | null;
   inspection_done: string | null;

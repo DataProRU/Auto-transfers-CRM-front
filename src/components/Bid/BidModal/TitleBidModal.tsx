@@ -34,7 +34,7 @@ interface TitleModalProps {
 }
 
 const TitleBidModal = ({ open, onClose }: TitleModalProps) => {
-  const { bid, updateTitleBid, bidError } = bidStore;
+  const { bid, updateTitleBid, bidError, setBidError } = bidStore;
   const { showNotification } = useNotification();
 
   const {
@@ -48,24 +48,25 @@ const TitleBidModal = ({ open, onClose }: TitleModalProps) => {
     defaultValues: {
       pickup_address: bid?.pickup_address || '',
       took_title: bid?.took_title || '',
-      notified_logisticial_by_title:
-        bid?.notified_logisticial_by_title || false,
+      notified_logistician_by_title:
+        bid?.notified_logistician_by_title || false,
     },
   });
 
   useEffect(() => {
     if (bidError) {
       showNotification(bidError, 'error');
+      setBidError(null);
     }
-  }, [bidError, showNotification]);
+  }, [bidError, showNotification, setBidError]);
 
   useEffect(() => {
     if (bid) {
       reset({
         pickup_address: bid?.pickup_address || '',
         took_title: bid?.took_title || '',
-        notified_logisticial_by_title:
-          bid?.notified_logisticial_by_title || false,
+        notified_logistician_by_title:
+          bid?.notified_logistician_by_title || false,
       });
     }
   }, [bid, reset]);
@@ -203,7 +204,7 @@ const TitleBidModal = ({ open, onClose }: TitleModalProps) => {
                 }
               />
               <Controller
-                name='notified_logisticial_by_title'
+                name='notified_logistician_by_title'
                 control={control}
                 render={({ field }) => (
                   <BidCheckbox

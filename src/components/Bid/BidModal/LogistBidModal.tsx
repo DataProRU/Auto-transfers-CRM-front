@@ -32,7 +32,7 @@ interface LogistBidModalProps {
 }
 
 const LogistBidModal = ({ open, onClose }: LogistBidModalProps) => {
-  const { bid, updateBid, bidError } = bidStore;
+  const { bid, updateBid, bidError, setBidError } = bidStore;
   const { showNotification } = useNotification();
   const [rejectOpen, setRejectOpen] = useState(false);
 
@@ -56,8 +56,9 @@ const LogistBidModal = ({ open, onClose }: LogistBidModalProps) => {
   useEffect(() => {
     if (bidError) {
       showNotification(bidError, 'error');
+      setBidError(null);
     }
-  }, [bidError, showNotification]);
+  }, [bidError, showNotification, setBidError]);
 
   useEffect(() => {
     if (bid) {

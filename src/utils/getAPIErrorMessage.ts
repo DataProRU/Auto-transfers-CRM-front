@@ -24,6 +24,10 @@ export function getAPIErrorMessage(e: unknown) {
         message.includes('No active account found with the given credentials')
       ) {
         return 'Неправильный логин или пароль';
+      } else if (
+        message.includes('Cannot take title without logistician notification.')
+      ) {
+        return 'Нельзя забрать тайтл без уведомления логиста';
       }
       return message;
     }
