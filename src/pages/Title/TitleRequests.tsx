@@ -1,21 +1,27 @@
-import Container from '@mui/material/Container';
-import Typography from '@mui/material/Typography';
+import { observer } from 'mobx-react-lite';
 import { useNotification } from '../../providers/Notification';
 import bidStore from '../../store/BidStore';
 import { useEffect } from 'react';
+import Container from '@mui/material/Container';
+import Typography from '@mui/material/Typography';
 import Grid from '@mui/material/Grid';
 import Paper from '@mui/material/Paper';
 import Box from '@mui/material/Box';
 import Chip from '@mui/material/Chip';
-import BidListItem from '../../components/Bid/BidListItem/BidListItem';
 import List from '@mui/material/List';
+import BidListItem from '../../components/Bid/BidListItem/BidListItem';
 import ListItem from '@mui/material/ListItem';
-import { observer } from 'mobx-react-lite';
 
-const Request = observer(() => {
+const TitleRequests = observer(() => {
   const { showNotification } = useNotification();
-  const { fetchBids, bidError, isBidLoading, untouchedBids, inProgressBids } =
-    bidStore;
+  const {
+    fetchBids,
+    bidError,
+    isBidLoading,
+    untouchedBids,
+    inProgressBids,
+    сompletedBids,
+  } = bidStore;
 
   useEffect(() => {
     fetchBids();
@@ -35,20 +41,20 @@ const Request = observer(() => {
         <Typography textAlign='center'>Загрузка данных...</Typography>
       ) : (
         <Grid container spacing={4}>
-          <Grid size={6}>
+          <Grid size={4}>
             <Paper elevation={3}>
               <Box
                 sx={{
                   p: 2,
                   bgcolor: 'primary.light',
-                  color: 'primary.contrastText',
+                  color: 'white',
                 }}
               >
                 <Typography variant='h6'>
                   Необработанные
                   <Chip
                     label={untouchedBids.length}
-                    color='secondary'
+                    color='primary'
                     sx={{ ml: 1 }}
                   />
                 </Typography>
@@ -68,13 +74,13 @@ const Request = observer(() => {
               </List>
             </Paper>
           </Grid>
-          <Grid size={6}>
+          <Grid size={4}>
             <Paper elevation={3}>
               <Box
                 sx={{
                   p: 2,
                   bgcolor: 'secondary.light',
-                  color: 'secondary.contrastText',
+                  color: 'white',
                 }}
               >
                 <Typography variant='h6'>
@@ -101,10 +107,43 @@ const Request = observer(() => {
               </List>
             </Paper>
           </Grid>
+          <Grid size={4}>
+            <Paper elevation={3}>
+              <Box
+                sx={{
+                  p: 2,
+                  bgcolor: 'green',
+                  color: 'white',
+                }}
+              >
+                <Typography variant='h6'>
+                  Завершено
+                  <Chip
+                    label={сompletedBids.length}
+                    color='primary'
+                    sx={{ ml: 1 }}
+                  />
+                </Typography>
+              </Box>
+              <List>
+                {сompletedBids.length > 0 ? (
+                  сompletedBids.map((bid) => (
+                    <BidListItem key={bid.id} bid={bid} />
+                  ))
+                ) : (
+                  <ListItem>
+                    <Typography variant='body2' color='text.secondary'>
+                      Нет заявок в работе
+                    </Typography>
+                  </ListItem>
+                )}
+              </List>
+            </Paper>
+          </Grid>
         </Grid>
       )}
     </Container>
   );
 });
 
-export default Request;
+export default TitleRequests;

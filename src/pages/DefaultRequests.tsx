@@ -1,18 +1,18 @@
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 import { useEffect } from 'react';
+import Grid from '@mui/material/Grid';
 import Paper from '@mui/material/Paper';
 import Box from '@mui/material/Box';
+import Chip from '@mui/material/Chip';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
-import Chip from '@mui/material/Chip';
-import Grid from '@mui/material/Grid';
-import { useNotification } from '../../providers/Notification';
-import bidStore from '../../store/BidStore';
 import { observer } from 'mobx-react-lite';
-import BidListItem from '../../components/Bid/BidListItem/BidListItem';
+import { useNotification } from '../providers/Notification';
+import bidStore from '../store/BidStore';
+import BidListItem from '../components/Bid/BidListItem/BidListItem';
 
-const Start = observer(() => {
+const DefaultRequests = observer(() => {
   const { showNotification } = useNotification();
   const { fetchBids, bidError, isBidLoading, untouchedBids, inProgressBids } =
     bidStore;
@@ -26,13 +26,11 @@ const Start = observer(() => {
       showNotification(bidError, 'error');
     }
   }, [bidError, showNotification]);
-
   return (
     <Container sx={{ py: 5 }}>
       <Typography component='h1' variant='h4' textAlign='center' mb={4}>
-        Начальный этап
+        Заявки
       </Typography>
-
       {isBidLoading ? (
         <Typography textAlign='center'>Загрузка данных...</Typography>
       ) : (
@@ -43,7 +41,7 @@ const Start = observer(() => {
                 sx={{
                   p: 2,
                   bgcolor: 'primary.light',
-                  color: 'primary.contrastText',
+                  color: 'white',
                 }}
               >
                 <Typography variant='h6'>
@@ -76,7 +74,7 @@ const Start = observer(() => {
                 sx={{
                   p: 2,
                   bgcolor: 'secondary.light',
-                  color: 'secondary.contrastText',
+                  color: 'white',
                 }}
               >
                 <Typography variant='h6'>
@@ -109,4 +107,4 @@ const Start = observer(() => {
   );
 });
 
-export default Start;
+export default DefaultRequests;

@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
-import { useNotification } from '../../providers/Notification';
-import bidStore from '../../store/BidStore';
+import { useNotification } from '../../../providers/Notification';
+import bidStore from '../../../store/BidStore';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
@@ -14,13 +14,13 @@ import AccordionDetails from '@mui/material/AccordionDetails';
 import TextField from '@mui/material/TextField';
 import moment from 'moment';
 import { Controller, useForm } from 'react-hook-form';
-import type { OpeningManagerBidFormData } from '../../@types/bid';
+import type { OpeningManagerBidFormData } from '../../../@types/bid';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { OpeningManagerBidFormSchema } from '../../schemas/bid';
+import { OpeningManagerBidFormSchema } from '../../../schemas/bid';
 import DialogActions from '@mui/material/DialogActions';
 import Button from '@mui/material/Button';
-import { getTransitMethod } from '../../utils/getTransitMethod';
-import BidCheckbox from './BidCheckBox';
+import { getTransitMethod } from '../../../utils/getTransitMethod';
+import BidCheckbox from '../BidCheckBox';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
@@ -37,7 +37,7 @@ const OpeningManagerBidModal = ({
   open,
   onClose,
 }: OpeningManagerModalProps) => {
-  const { bid, openningManagerUpdateBid, bidError } = bidStore;
+  const { bid, updateBid, bidError, setBidError } = bidStore;
   const { showNotification } = useNotification();
 
   const {
@@ -58,8 +58,9 @@ const OpeningManagerBidModal = ({
   useEffect(() => {
     if (bidError) {
       showNotification(bidError, 'error');
+      setBidError(null);
     }
-  }, [bidError, showNotification]);
+  }, [bidError, showNotification, setBidError]);
 
   useEffect(() => {
     if (bid) {
@@ -80,7 +81,11 @@ const OpeningManagerBidModal = ({
           'YYYY-MM-DD'
         ),
       };
-      const isSuccess = await openningManagerUpdateBid(bid.id, convertedData);
+      const isSuccess = await updateBid(
+        bid.id,
+        convertedData,
+        convertedData.openning_date
+      );
       if (isSuccess) {
         showNotification('Данные успешно изменены!', 'success');
         onClose();
@@ -214,7 +219,7 @@ const OpeningManagerBidModal = ({
                 )}
               />
               <TextField
-                id='reason'
+                id='comment'
                 label='Комментарий'
                 multiline
                 maxRows={4}
