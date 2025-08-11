@@ -49,7 +49,9 @@ const OpeningManagerBidModal = ({
   } = useForm<OpeningManagerBidFormData>({
     resolver: zodResolver(OpeningManagerBidFormSchema),
     defaultValues: {
-      openning_date: moment(bid?.openning_date).format('DD.MM.YYYY') || '',
+      openning_date: bid?.openning_date
+        ? moment(bid.openning_date).format('DD.MM.YYYY')
+        : null,
       manager_comment: bid?.manager_comment || '',
       opened: bid?.opened || false,
     },
@@ -65,7 +67,9 @@ const OpeningManagerBidModal = ({
   useEffect(() => {
     if (bid) {
       reset({
-        openning_date: moment(bid?.openning_date).format('DD.MM.YYYY') || '',
+        openning_date: bid?.openning_date
+          ? moment(bid.openning_date).format('DD.MM.YYYY')
+          : null,
         manager_comment: bid?.manager_comment || '',
         opened: bid?.opened || false,
       });
@@ -77,15 +81,11 @@ const OpeningManagerBidModal = ({
     if (bid) {
       const convertedData = {
         ...data,
-        openning_date: moment(data.openning_date, 'DD.MM.YYYY').format(
-          'YYYY-MM-DD'
-        ),
+        openning_date: data.openning_date
+          ? moment(data.openning_date, 'DD.MM.YYYY').format('YYYY-MM-DD')
+          : null,
       };
-      const isSuccess = await updateBid(
-        bid.id,
-        convertedData,
-        convertedData.openning_date
-      );
+      const isSuccess = await updateBid(bid.id, convertedData, true);
       if (isSuccess) {
         showNotification('Данные успешно изменены!', 'success');
         onClose();
@@ -205,7 +205,7 @@ const OpeningManagerBidModal = ({
                       field.value ? moment(field.value, 'DD.MM.YYYY') : null
                     }
                     onChange={(date) => {
-                      field.onChange(date?.format('DD.MM.YYYY') || '');
+                      field.onChange(date ? date.format('DD.MM.YYYY') : null);
                     }}
                     format='DD.MM.YYYY'
                     slotProps={{
