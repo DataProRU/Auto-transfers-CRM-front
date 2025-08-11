@@ -231,7 +231,6 @@ const LogistBidModal = ({ open, onClose }: LogistBidModalProps) => {
               label='Местонахождение'
               id='location'
               variant='outlined'
-              value={bid?.location}
               {...register('location')}
               error={!!errors.location}
               helperText={errors.location?.message}

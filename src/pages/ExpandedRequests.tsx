@@ -1,6 +1,6 @@
 import { observer } from 'mobx-react-lite';
-import { useNotification } from '../../providers/Notification';
-import bidStore from '../../store/BidStore';
+import { useNotification } from '../providers/Notification';
+import bidStore from '../store/BidStore';
 import { useEffect } from 'react';
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
@@ -9,10 +9,10 @@ import Paper from '@mui/material/Paper';
 import Box from '@mui/material/Box';
 import Chip from '@mui/material/Chip';
 import List from '@mui/material/List';
-import BidListItem from '../../components/Bid/BidListItem/BidListItem';
+import BidListItem from '../components/Bid/BidListItem/BidListItem';
 import ListItem from '@mui/material/ListItem';
 
-const TitleRequests = observer(() => {
+const ExpandedRequests = observer(() => {
   const { showNotification } = useNotification();
   const {
     fetchBids,
@@ -146,4 +146,4 @@ const TitleRequests = observer(() => {
   );
 });
 
-export default TitleRequests;
+export default ExpandedRequests;

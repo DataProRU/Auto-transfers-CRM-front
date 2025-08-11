@@ -60,3 +60,8 @@ export const InspectorBidFormSchema = z.object({
   inspection_paid: z.boolean().optional(),
   inspector_comment: z.string().optional(),
 });
+
+export const ReExportBidFormSchema = z.object({
+  export: z.boolean().optional(),
+  prepared_documents: z.boolean().optional(),
+});

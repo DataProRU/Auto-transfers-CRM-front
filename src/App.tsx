@@ -11,7 +11,7 @@ const Loading = lazy(() => import('./pages/Logist/Loading'));
 const CarTransporter = lazy(() => import('./pages/Logist/CarTrasporter'));
 const EditRequests = lazy(() => import('./pages/Logist/EditRequests'));
 const Auth = lazy(() => import('./pages/Auth'));
-const TitleRequests = lazy(() => import('./pages/Title/TitleRequests'));
+const ExpandedRequests = lazy(() => import('./pages/ExpandedRequests'));
 
 const App = observer(() => {
   const { checkAuth, isAuthChecking, role } = authStore;
@@ -46,13 +46,14 @@ const App = observer(() => {
                     'opening_manager',
                     'title',
                     'inspector',
+                    're_export',
                   ]}
                 >
                   <Header />
                   {DefaultRequestsRoles.includes(role!) ? (
                     <DefaultRequests />
                   ) : (
-                    <TitleRequests />
+                    <ExpandedRequests />
                   )}
                 </ProtectedRoute>
               }
