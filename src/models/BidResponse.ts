@@ -6,6 +6,7 @@ export interface Bid {
   brand: string;
   model: string;
   vin: string;
+  price: number;
   container_number: string;
   arrival_date: string;
   transporter: string;
@@ -34,4 +35,6 @@ export interface Bid {
   number_sent_date: string | null;
   inspection_paid: boolean;
   inspector_comment: string | null;
+  export: boolean;
+  prepared_documents: boolean;
 }

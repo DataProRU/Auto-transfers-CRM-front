@@ -12,6 +12,8 @@ import TitleBidInfo from './TitleBidInfo';
 import TitleBidModal from '../BidModal/TitleBidModal';
 import InspectorBidInfo from './InspectorBidInfo';
 import InspectorBidModal from '../BidModal/InspectorBidModal';
+import ReExportBidInfo from './ReExportBidInfo';
+import ReExportBidModal from '../BidModal/ReExportBidModal';
 
 interface BidListItemProps {
   bid: Bid;
@@ -68,8 +70,10 @@ const BidListItem = observer(({ bid }: BidListItemProps) => {
           <OpeningManagerBidInfo bid={bid} />
         ) : role === 'title' ? (
           <TitleBidInfo bid={bid} />
-        ) : (
+        ) : role === 'inspector' ? (
           <InspectorBidInfo bid={bid} />
+        ) : (
+          <ReExportBidInfo bid={bid} />
         )}
       </ListItem>
       {role === 'logistician' ? (
@@ -78,8 +82,10 @@ const BidListItem = observer(({ bid }: BidListItemProps) => {
         <OpeningManagerBidModal open={open} onClose={handleClose} />
       ) : role === 'title' ? (
         <TitleBidModal open={open} onClose={handleClose} />
-      ) : (
+      ) : role === 'inspector' ? (
         <InspectorBidModal open={open} onClose={handleClose} />
+      ) : (
+        <ReExportBidModal open={open} onClose={handleClose} />
       )}
     </>
   );

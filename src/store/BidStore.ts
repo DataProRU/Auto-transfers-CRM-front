@@ -5,6 +5,7 @@ import type {
   BidFormData,
   InspectorBidFormData,
   OpeningManagerBidFormData,
+  ReExportBidFormData,
   RejectBidFormData,
   TitleBidFormData,
 } from '../@types/bid';
@@ -125,6 +126,79 @@ class BidStore {
 
       if (data.notified_logistician_by_title === true) {
         if (data.took_title === 'yes' || data.took_title === 'consignment') {
+          const movedBid =
+            this.untouchedBids.find((bid) => bid.id === id) ||
+            this.inProgressBids.find((bid) => bid.id === id);
+
+          if (movedBid) {
+            const updatedUntouched = this.untouchedBids.filter(
+              (bid) => bid.id !== id
+            );
+            this.setuntouchedBids(updatedUntouched);
+
+            const updatedInProgress = this.inProgressBids.filter(
+              (bid) => bid.id !== id
+            );
+            this.setInProgressBids(updatedInProgress);
+
+            this.setCompletedBids([
+              ...this.сompletedBids,
+              { ...movedBid, ...data },
+            ]);
+          } else {
+            const updatedCompleted = this.сompletedBids.map((bid) =>
+              bid.id === id ? { ...bid, ...data } : bid
+            );
+            this.setCompletedBids(updatedCompleted);
+          }
+        } else {
+          const movedBid = this.untouchedBids.find((bid) => bid.id === id);
+          if (movedBid) {
+            const updatedUntouched = this.untouchedBids.filter(
+              (bid) => bid.id !== id
+            );
+            this.setuntouchedBids(updatedUntouched);
+
+            this.setInProgressBids([
+              ...this.inProgressBids,
+              { ...movedBid, ...data },
+            ]);
+          } else {
+            const updatedInProgress = this.inProgressBids.map((bid) =>
+              bid.id === id ? { ...bid, ...data } : bid
+            );
+            this.setInProgressBids(updatedInProgress);
+          }
+        }
+      } else {
+        const movedBid = this.inProgressBids.find((bid) => bid.id === id);
+        if (movedBid) {
+          const updatedInProgress = this.inProgressBids.filter(
+            (bid) => bid.id !== id
+          );
+          this.setInProgressBids(updatedInProgress);
+
+          this.setuntouchedBids([
+            ...this.untouchedBids,
+            { ...movedBid, ...data },
+          ]);
+        }
+      }
+      return true;
+    } catch (e) {
+      const message = getAPIErrorMessage(e);
+      this.setBidError(message);
+      return false;
+    }
+  };
+
+  updateReExportBid = async (id: number, data: ReExportBidFormData) => {
+    try {
+      this.setBidError(null);
+      await BidService.changeBid(id, data);
+
+      if (data.prepared_documents === true) {
+        if (data.export) {
           const movedBid =
             this.untouchedBids.find((bid) => bid.id === id) ||
             this.inProgressBids.find((bid) => bid.id === id);

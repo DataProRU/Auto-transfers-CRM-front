@@ -2,6 +2,7 @@ import type {
   BidFormData,
   InspectorBidFormData,
   OpeningManagerBidFormData,
+  ReExportBidFormData,
   RejectBidFormData,
   TitleBidFormData,
 } from '../@types/bid';
@@ -21,6 +22,7 @@ class BidService {
       | OpeningManagerBidFormData
       | TitleBidFormData
       | InspectorBidFormData
+      | ReExportBidFormData
   ) {
     return $api.put(`/autotrips/bids/${id}/`, data, {
       headers: { 'Content-Type': 'application/json' },

@@ -25,6 +25,8 @@ const getRole = (role: string) => {
       return 'Тайтл';
     case 'inspector':
       return 'Осмотр';
+    case 're_export':
+      return 'Реэспорт';
     default:
       return 'Пользователь';
   }

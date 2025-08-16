@@ -3,6 +3,7 @@ import type {
   bidFormSchema,
   InspectorBidFormSchema,
   OpeningManagerBidFormSchema,
+  ReExportBidFormSchema,
   rejectBidFormSchema,
   TitleBidFormSchema,
 } from '../schemas/bid';
@@ -18,3 +19,5 @@ export type OpeningManagerBidFormData = z.infer<
 export type TitleBidFormData = z.infer<typeof TitleBidFormSchema>;
 
 export type InspectorBidFormData = z.infer<typeof InspectorBidFormSchema>;
+
+export type ReExportBidFormData = z.infer<typeof ReExportBidFormSchema>;
