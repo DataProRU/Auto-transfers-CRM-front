@@ -1,6 +1,6 @@
 import { jwtDecode } from 'jwt-decode';
 
-interface JwtPayload {
+export interface JwtPayload {
   user_id: number;
   role: string;
   exp: number;

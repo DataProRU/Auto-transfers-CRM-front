@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig.app.json",
+  "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "types": ["node", "jest"]
+  },
+  "include": ["src", "jest.setup.ts"],
+  "allowJs": true
+}
