@@ -20,3 +20,13 @@ if (typeof globalThis.TextDecoder === 'undefined') {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (globalThis as any).TextDecoder = PolyfillTextDecoder;
 }
+
+jest.mock('./src/setup/axios', () => ({
+  API_URL: 'http://localhost:8000',
+  api: {
+    get: jest.fn(),
+    post: jest.fn(),
+    put: jest.fn(),
+    delete: jest.fn(),
+  },
+}));
