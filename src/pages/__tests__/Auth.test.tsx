@@ -1,14 +1,11 @@
-// __tests__/Auth.test.tsx
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import Auth from '../Auth';
 import { authStore } from '../../store/AuthStore';
 import { BrowserRouter } from 'react-router-dom';
 import '@testing-library/jest-dom';
 import userEvent from '@testing-library/user-event';
-
-jest.mock('../../setup/axios', () => ({
-  API_URL: 'http://localhost:8000',
-}));
+import type { AxiosResponse } from 'axios';
+import type { AuthResponse } from '../../models/AuthResponse';
 
 const mockedNavigate = jest.fn();
 jest.mock('react-router-dom', () => ({
@@ -23,6 +20,25 @@ jest.mock('../../providers/Notification', () => ({
   }),
 }));
 
+// Мокаем весь AuthStore
+jest.mock('../../store/AuthStore', () => ({
+  authStore: {
+    isAuth: false,
+    isAuthChecking: false,
+    role: null,
+    authError: null,
+    setIsAuth: jest.fn(),
+    setIsAuthChecking: jest.fn(),
+    setRole: jest.fn(),
+    setAuthError: jest.fn(),
+    login: jest.fn(),
+    verify: jest.fn(),
+    refresh: jest.fn(),
+    logout: jest.fn(),
+    checkAuth: jest.fn(),
+  },
+}));
+
 const renderAuth = () =>
   render(
     <BrowserRouter>
@@ -33,7 +49,6 @@ const renderAuth = () =>
 describe('Auth Page', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.spyOn(authStore, 'setIsAuth').mockImplementation(() => {});
   });
 
   it('рендерит форму авторизации', () => {
@@ -72,11 +87,9 @@ describe('Auth Page', () => {
         refresh: 'mockRefreshToken',
         access: 'mockAccessToken',
       },
-    };
+    } as AxiosResponse<AuthResponse>;
 
-    // Мокаем метод login чтобы возвращать успешный ответ
-    const loginMock = jest.fn().mockResolvedValueOnce(mockResponse);
-    (authStore as typeof authStore).login = loginMock;
+    (authStore.login as jest.Mock).mockResolvedValue(mockResponse);
 
     renderAuth();
 
@@ -89,32 +102,20 @@ describe('Auth Page', () => {
     await userEvent.click(screen.getByRole('button', { name: /Войти/i }));
 
     await waitFor(() => {
-      expect(loginMock).toHaveBeenCalledWith('validuser', 'validpassword123');
+      expect(authStore.login).toHaveBeenCalledWith(
+        'validuser',
+        'validpassword123'
+      );
     });
 
     expect(mockedNavigate).toHaveBeenCalledWith('/');
-
-    // // 3. Токены были сохранены в localStorage
-    // expect(localStorage.setItem).toHaveBeenCalledWith(
-    //   'crmAccess',
-    //   'mockAccessToken'
-    // );
-    // expect(localStorage.setItem).toHaveBeenCalledWith(
-    //   'crmRefresh',
-    //   'mockRefreshToken'
-    // );
-
-    // 4. Состояние авторизации было обновлено
-    // expect(authStore.setIsAuth).toHaveBeenCalledWith(true); ???
   });
 
   it('вызывает showNotification при ошибке авторизации', async () => {
-    const loginMock = jest
-      .fn()
-      .mockRejectedValueOnce(new Error('Ошибка авторизации'));
-
-    (authStore as typeof authStore).login = loginMock;
-    authStore.authError = 'Неверный логин или пароль';
+    (authStore.login as jest.Mock).mockRejectedValue(
+      new Error('Ошибка авторизации')
+    );
+    (authStore.authError as string) = 'Неверный логин или пароль';
 
     renderAuth();
 
