@@ -9,6 +9,7 @@ export const APPROVED_ROLES = [
   'inspector',
   're_export',
   'reciever',
+  'user',
 ];
 
 const $api = axios.create({

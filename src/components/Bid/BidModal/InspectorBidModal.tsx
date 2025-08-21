@@ -86,7 +86,14 @@ const InspectorBidModal = ({ open, onClose }: InspectorModalProps) => {
         number_sent_date:
           data.number_sent === true ? moment().format('YYYY-MM-DD') : null,
       };
-      const isSuccess = await updateBid(bid.id, payload, true);
+      const isSuccess = await updateBid(
+        bid.id,
+        payload,
+        (bid?.transit_method === 'without_openning' &&
+          payload.notified_logistician_by_inspector === true) ||
+          (bid?.transit_method === 're_export' &&
+            payload.inspection_done === 'yes')
+      );
       if (isSuccess) {
         showNotification('Данные успешно изменены!', 'success');
         onClose();

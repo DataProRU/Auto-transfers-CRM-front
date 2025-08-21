@@ -6,25 +6,25 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
-import bidStore from '../../../store/BidStore';
+import bidStore from '../../../../store/BidStore';
 import moment from 'moment';
 import FormControl from '@mui/material/FormControl';
 import InputLabel from '@mui/material/InputLabel';
 import Select from '@mui/material/Select';
 import { useEffect, useState } from 'react';
 import MenuItem from '@mui/material/MenuItem';
-import BidCheckbox from '../BidCheckBox';
+import BidCheckbox from '../../BidCheckBox';
 import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Typography from '@mui/material/Typography';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import { Controller, useForm, useWatch } from 'react-hook-form';
-import type { BidFormData } from '../../../@types/bid';
+import type { BidFormData } from '../../../../@types/bid';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { bidFormSchema } from '../../../schemas/bid';
-import { useNotification } from '../../../providers/Notification';
-import RejectBidModal from './RejectBidModal';
+import { bidFormSchema } from '../../../../schemas/bid';
+import { useNotification } from '../../../../providers/Notification';
+import RejectBidModal from '../RejectBidModal';
 
 interface LogistBidModalProps {
   open: boolean;
@@ -80,7 +80,6 @@ const LogistBidModal = ({ open, onClose }: LogistBidModalProps) => {
   const isReExport = transitMethod === 're_export';
 
   const onSubmit = async (data: BidFormData) => {
-    console.log(data);
     if (bid) {
       const isSuccess = await updateBid(bid.id, data, data.transit_method);
       if (isSuccess) {
@@ -156,7 +155,7 @@ const LogistBidModal = ({ open, onClose }: LogistBidModalProps) => {
                   />
                   <TextField
                     label='Номер контейнера'
-                    id='fatherName'
+                    id='container_number'
                     variant='outlined'
                     disabled
                     value={bid?.container_number}
@@ -166,13 +165,22 @@ const LogistBidModal = ({ open, onClose }: LogistBidModalProps) => {
                     id='arrivalDate'
                     variant='outlined'
                     disabled
-                    value={moment(bid?.arrival_date).format('DD.MM.YYYY')}
+                    value={
+                      bid?.arrival_date
+                        ? moment(bid?.arrival_date).format('DD.MM.YYYY')
+                        : ''
+                    }
                   />
                   <TextField
                     label='Предпологаемая дата открытия контейнера'
-                    id='fatherName'
+                    id='openning_date'
                     variant='outlined'
                     disabled
+                    value={
+                      bid?.openning_date
+                        ? moment(bid?.openning_date).format('DD.MM.YYYY')
+                        : ''
+                    }
                   />
                   <TextField
                     label='Получатель'

@@ -47,6 +47,7 @@ const App = observer(() => {
                     'title',
                     'inspector',
                     're_export',
+                    'user',
                   ]}
                 >
                   <Header />

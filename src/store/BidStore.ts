@@ -4,6 +4,7 @@ import BidService from '../services/BidService';
 import type {
   BidFormData,
   InspectorBidFormData,
+  LogistBidLoadingFormData,
   OpeningManagerBidFormData,
   ReExportBidFormData,
   RejectBidFormData,
@@ -18,39 +19,45 @@ class BidStore {
   untouchedBids: Bid[] | [] = [];
   inProgressBids: Bid[] | [] = [];
   сompletedBids: Bid[] | [] = [];
+  isBidFromLoading: boolean = false;
 
-  setBid(bid: Bid | null) {
+  setBid = (bid: Bid | null) => {
     this.bid = bid;
-  }
+  };
 
-  setIsBidLoaging(isBidLoading: boolean) {
+  setIsBidLoaging = (isBidLoading: boolean) => {
     this.isBidLoading = isBidLoading;
-  }
+  };
 
-  setBidError(bidError: string | null) {
+  setBidError = (bidError: string | null) => {
     this.bidError = bidError;
-  }
+  };
 
-  setuntouchedBids(untouchedBids: Bid[] | []) {
+  setuntouchedBids = (untouchedBids: Bid[] | []) => {
     this.untouchedBids = untouchedBids;
-  }
+  };
 
-  setInProgressBids(inProgressBids: Bid[] | []) {
+  setInProgressBids = (inProgressBids: Bid[] | []) => {
     this.inProgressBids = inProgressBids;
-  }
+  };
 
-  setCompletedBids(completedBids: Bid[] | []) {
+  setCompletedBids = (completedBids: Bid[] | []) => {
     this.сompletedBids = completedBids;
-  }
+  };
+
+  setBidFromLoading = (isBidFromLOading: boolean) => {
+    this.isBidFromLoading = isBidFromLOading;
+  };
 
   constructor() {
-    makeAutoObservable(this, {}, { autoBind: true });
+    makeAutoObservable(this);
   }
 
-  fetchBids = async () => {
+  fetchBids = async (status: string | null = null) => {
     try {
       this.setIsBidLoaging(true);
-      const response = await BidService.getBids();
+      this.setBidFromLoading(false);
+      const response = await BidService.getBids(status);
 
       const unTouched = response.data.untouched;
       this.setuntouchedBids(unTouched);
@@ -66,18 +73,25 @@ class BidStore {
       this.setBidError(message);
       this.setInProgressBids([]);
     } finally {
+      if (status) this.setBidFromLoading(true);
       this.setIsBidLoaging(false);
     }
   };
 
   updateBid = async (
     id: number,
-    data: BidFormData | OpeningManagerBidFormData | InspectorBidFormData,
-    field: unknown
+    data:
+      | BidFormData
+      | OpeningManagerBidFormData
+      | InspectorBidFormData
+      | LogistBidLoadingFormData,
+    field: unknown,
+    status: string | null = null
   ) => {
     try {
       this.setBidError(null);
-      await BidService.changeBid(id, data);
+      const response = await BidService.changeBid(id, data, status);
+      const updatedData = response.data;
 
       if (field !== false || (field !== null && typeof field !== 'boolean')) {
         const movedBid = this.untouchedBids.find((bid) => bid.id === id);
@@ -89,7 +103,11 @@ class BidStore {
 
           this.setInProgressBids([
             ...this.inProgressBids,
-            { ...movedBid, ...data },
+            {
+              ...movedBid,
+              ...data,
+              vehicle_transporter: updatedData.vehicle_transporter || undefined,
+            },
           ]);
         } else {
           const updatedInProgress = this.inProgressBids.map((bid) =>

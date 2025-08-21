@@ -1,7 +1,7 @@
 import ListItem from '@mui/material/ListItem';
 import type { Bid } from '../../../models/BidResponse';
 import { useState } from 'react';
-import LogistBidModal from '../BidModal/LogistBidModal';
+import LogistBidModal from '../BidModal/Logist/LogistBidModal';
 import bidStore from '../../../store/BidStore';
 import { observer } from 'mobx-react-lite';
 import { authStore } from '../../../store/AuthStore';
@@ -14,6 +14,7 @@ import InspectorBidInfo from './InspectorBidInfo';
 import InspectorBidModal from '../BidModal/InspectorBidModal';
 import ReExportBidInfo from './ReExportBidInfo';
 import ReExportBidModal from '../BidModal/ReExportBidModal';
+import LogistLoadingBidModal from '../BidModal/Logist/LogistLoadingBidModal';
 
 interface BidListItemProps {
   bid: Bid;
@@ -28,7 +29,7 @@ const transitMethodColors = {
 
 const BidListItem = observer(({ bid }: BidListItemProps) => {
   const [open, setOpen] = useState(false);
-  const { setBid } = bidStore;
+  const { setBid, isBidFromLoading } = bidStore;
   const { role } = authStore;
 
   const handleOpen = () => {
@@ -76,7 +77,9 @@ const BidListItem = observer(({ bid }: BidListItemProps) => {
           <ReExportBidInfo bid={bid} />
         )}
       </ListItem>
-      {role === 'logistician' ? (
+      {role === 'logistician' && isBidFromLoading === true ? (
+        <LogistLoadingBidModal open={open} onClose={handleClose} />
+      ) : role === 'logistician' ? (
         <LogistBidModal open={open} onClose={handleClose} />
       ) : role === 'opening_manager' ? (
         <OpeningManagerBidModal open={open} onClose={handleClose} />
