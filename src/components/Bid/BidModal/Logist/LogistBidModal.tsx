@@ -99,6 +99,7 @@ const LogistBidModal = ({ open, onClose }: LogistBidModalProps) => {
         onClose={onClose}
         onSubmit={handleSubmit(onSubmit)}
         component='form'
+        data-testid='dialogLogistBidModal'
       >
         <DialogTitle>
           Заявка на {bid?.brand} {bid?.model} {bid?.vin}
@@ -304,7 +305,7 @@ const LogistBidModal = ({ open, onClose }: LogistBidModalProps) => {
           </Button>
         </DialogActions>
       </Dialog>
-      <RejectBidModal open={rejectOpen} onClose={() => setRejectOpen(false)} />
+      <RejectBidModal data-testid='dialogRejectBidModal' open={rejectOpen} onClose={() => setRejectOpen(false)} />
     </>
   );
 };
