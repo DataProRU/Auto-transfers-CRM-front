@@ -77,7 +77,6 @@ const OpeningManagerBidModal = ({
   }, [bid, reset]);
 
   const onSubmit = async (data: OpeningManagerBidFormData) => {
-    console.log(data);
     if (bid) {
       const convertedData = {
         ...data,
