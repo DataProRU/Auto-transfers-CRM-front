@@ -2,6 +2,7 @@ import type z from 'zod';
 import type {
   bidFormSchema,
   InspectorBidFormSchema,
+  logistbidLoadingFormSchema,
   OpeningManagerBidFormSchema,
   ReExportBidFormSchema,
   rejectBidFormSchema,
@@ -9,6 +10,10 @@ import type {
 } from '../schemas/bid';
 
 export type BidFormData = z.infer<typeof bidFormSchema>;
+
+export type LogistBidLoadingFormData = z.infer<
+  typeof logistbidLoadingFormSchema
+>;
 
 export type RejectBidFormData = z.infer<typeof rejectBidFormSchema>;
 

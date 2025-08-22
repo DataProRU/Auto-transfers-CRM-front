@@ -14,21 +14,21 @@ class AuthStore {
     makeAutoObservable(this);
   }
 
-  setIsAuth(isAuth: boolean) {
+  setIsAuth = (isAuth: boolean) => {
     this.isAuth = isAuth;
-  }
+  };
 
-  setIsAuthChecking(isAuthChecking: boolean) {
+  setIsAuthChecking = (isAuthChecking: boolean) => {
     this.isAuthChecking = isAuthChecking;
-  }
+  };
 
-  setRole(role: string | null) {
+  setRole = (role: string | null) => {
     this.role = role;
-  }
+  };
 
-  setAuthError(authError: string | null) {
+  setAuthError = (authError: string | null) => {
     this.authError = authError;
-  }
+  };
 
   login = async (email: string, password: string) => {
     try {

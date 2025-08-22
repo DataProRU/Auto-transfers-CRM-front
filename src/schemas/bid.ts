@@ -8,6 +8,16 @@ export const bidFormSchema = z.object({
   notified_inspector: z.boolean().optional(),
 });
 
+export const logistbidLoadingFormSchema = z.object({
+  vehicle_transporter: z.number({
+    required_error: 'Автовоз не может быть пустым',
+    invalid_type_error: 'Автовоз не может быть пустым',
+  }),
+  logistician_keys_number: z
+    .number()
+    .min(1, 'Количество ключей должно быть не менее 1'),
+});
+
 export const rejectBidFormSchema = z.object({
   logistician_comment: z
     .string()

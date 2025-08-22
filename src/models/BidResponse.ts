@@ -1,4 +1,10 @@
+import type { Tranporter } from './TranporterResponse';
 import type { Client } from './UserResponse';
+
+export interface VehicleType {
+  id: number;
+  v_type: string;
+}
 
 export interface Bid {
   id: number;
@@ -6,6 +12,7 @@ export interface Bid {
   brand: string;
   model: string;
   vin: string;
+  v_type: VehicleType;
   price: number;
   container_number: string;
   arrival_date: string;
@@ -37,4 +44,6 @@ export interface Bid {
   inspector_comment: string | null;
   export: boolean;
   prepared_documents: boolean;
+  vehicle_transporter: Tranporter | number;
+  logistician_keys_number: number;
 }
