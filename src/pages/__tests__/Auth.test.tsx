@@ -1,11 +1,11 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import Auth from '../Auth';
-import { authStore } from '../../store/AuthStore';
+import { authStore } from '@/store/AuthStore';
 import { BrowserRouter } from 'react-router-dom';
 import '@testing-library/jest-dom';
 import userEvent from '@testing-library/user-event';
 import type { AxiosResponse } from 'axios';
-import type { AuthResponse } from '../../models/AuthResponse';
+import type { AuthResponse } from '@/models/AuthResponse';
 
 const mockedNavigate = jest.fn();
 jest.mock('react-router-dom', () => ({
@@ -14,14 +14,13 @@ jest.mock('react-router-dom', () => ({
 }));
 
 const mockedShowNotification = jest.fn();
-jest.mock('../../providers/Notification', () => ({
+jest.mock('@/providers/Notification', () => ({
   useNotification: () => ({
     showNotification: mockedShowNotification,
   }),
 }));
 
-// Мокаем весь AuthStore
-jest.mock('../../store/AuthStore', () => ({
+jest.mock('@/store/AuthStore', () => ({
   authStore: {
     isAuth: false,
     isAuthChecking: false,
