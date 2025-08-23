@@ -1,10 +1,9 @@
 import { render, screen, waitFor, within } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import DefaultRequests from '../DefaultRequests';
-import type { Bid } from '@/models/BidResponse';
 import '@testing-library/jest-dom';
-import type { Client } from '@/models/UserResponse.ts';
 import bidStore from '@/store/BidStore';
+import { makeBid, makeClient } from '@/utils/test/factories.ts';
 
 const mockedShowNotification = jest.fn();
 jest.mock('@/providers/Notification', () => ({
@@ -12,56 +11,6 @@ jest.mock('@/providers/Notification', () => ({
     showNotification: mockedShowNotification,
   }),
 }));
-
-const makeClient = (overrides: Partial<Client> = {}): Client => ({
-  id: 1,
-  full_name: 'Test Client',
-  phone: '+10000000000',
-  telegram: '@test',
-  company: null,
-  address: null,
-  email: 'test@example.com',
-  ...overrides,
-});
-const makeBid = (overrides: Partial<Bid> = {}): Bid => ({
-  id: 1,
-  client: makeClient(),
-  brand: 'Toyota',
-  model: 'Camry',
-  vin: 'VIN123456789012345',
-  price: 25000,
-  container_number: 'CONT123456',
-  arrival_date: '2024-01-15',
-  transporter: 'Test Transporter',
-  recipient: 'Test Recipient',
-  transit_method: null,
-  location: null,
-  requested_title: false,
-  notified_parking: false,
-  notified_inspector: false,
-  openning_date: null,
-  approved_by_inspector: false,
-  approved_by_title: false,
-  approved_by_re_export: false,
-  opened: false,
-  manager_comment: null,
-  pickup_address: null,
-  title_collection_date: null,
-  took_title: null,
-  notified_logistician_by_title: false,
-  notified_logistician_by_inspector: false,
-  acceptance_date: null,
-  transit_number: null,
-  inspection_done: null,
-  inspection_date: null,
-  number_sent: false,
-  number_sent_date: null,
-  inspection_paid: false,
-  inspector_comment: null,
-  export: false,
-  prepared_documents: false,
-  ...overrides,
-});
 
 jest.mock('@/store/BidStore', () => ({
   __esModule: true,
