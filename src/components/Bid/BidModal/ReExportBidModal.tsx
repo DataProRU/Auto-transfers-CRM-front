@@ -79,6 +79,7 @@ const ReExportBidModal = ({ open, onClose }: ReExportModalProps) => {
   return (
     <>
       <Dialog
+        data-testid='dialogReExportBidModal'
         open={open}
         onClose={onClose}
         component='form'

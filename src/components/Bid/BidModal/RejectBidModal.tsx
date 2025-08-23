@@ -53,11 +53,11 @@ const RejectBidModal = observer(({ open, onClose }: RejectBidModalProps) => {
 
   return (
     <Dialog
+      data-testid='dialogRejectBidModal'
       open={open}
       onClose={onClose}
       onSubmit={handleSubmit(onSubmit)}
       component='form'
-      data-testid='dialogRejectBidModal'
     >
       <DialogTitle>Отказ в заявке</DialogTitle>
       <DialogContent>

@@ -95,11 +95,11 @@ const LogistBidModal = ({ open, onClose }: LogistBidModalProps) => {
   return (
     <>
       <Dialog
+        data-testid='dialogLogistBidModal'
         open={open}
         onClose={onClose}
         onSubmit={handleSubmit(onSubmit)}
         component='form'
-        data-testid='dialogLogistBidModal'
       >
         <DialogTitle>
           Заявка на {bid?.brand} {bid?.model} {bid?.vin}

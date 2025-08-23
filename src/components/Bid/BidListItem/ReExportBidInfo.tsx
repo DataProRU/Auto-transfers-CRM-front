@@ -9,7 +9,7 @@ interface ReExportBidInfoProps {
 
 const ReExportBidInfo = ({ bid }: ReExportBidInfoProps) => {
   return (
-    <Box sx={{ width: '100%' }}>
+    <Box data-testid='reExportBidInfo' sx={{ width: '100%' }}>
       <Typography variant='subtitle1' fontWeight='bold'>
         {bid.brand} {bid.model}
       </Typography>
