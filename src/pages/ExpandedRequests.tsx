@@ -133,7 +133,7 @@ const ExpandedRequests = observer(() => {
                 ) : (
                   <ListItem>
                     <Typography variant='body2' color='text.secondary'>
-                      Нет заявок в работе
+                      Нет завершенных заявок
                     </Typography>
                   </ListItem>
                 )}

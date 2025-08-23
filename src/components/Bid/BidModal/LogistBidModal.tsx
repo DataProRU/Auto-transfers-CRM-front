@@ -20,10 +20,10 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Typography from '@mui/material/Typography';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import { Controller, useForm, useWatch } from 'react-hook-form';
-import type { BidFormData } from '../../../@types/bid';
+import type { BidFormData } from '@/@types/bid';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { bidFormSchema } from '../../../schemas/bid';
-import { useNotification } from '../../../providers/Notification';
+import { bidFormSchema } from '@/schemas/bid';
+import { useNotification } from '@/providers/Notification';
 import RejectBidModal from './RejectBidModal';
 
 interface LogistBidModalProps {
