@@ -1,9 +1,9 @@
 import bidStore from '../BidStore';
-import BidService from '../../services/BidService';
-import { getAPIErrorMessage } from '../../utils/getAPIErrorMessage';
+import BidService from '@/services/BidService';
+import { getAPIErrorMessage } from '@/utils/getAPIErrorMessage';
 import type { AxiosResponse } from 'axios';
-import type { Bid } from '../../models/BidResponse';
-import type { Client } from '../../models/UserResponse';
+import type { Bid } from '@/models/BidResponse';
+import { makeBid } from '@/utils/test/factories.ts';
 import type {
   BidFormData,
   InspectorBidFormData,
@@ -11,10 +11,10 @@ import type {
   ReExportBidFormData,
   RejectBidFormData,
   TitleBidFormData,
-} from '../../@types/bid';
+} from '@/@types/bid';
 
-jest.mock('../../services/BidService');
-jest.mock('../../utils/getAPIErrorMessage');
+jest.mock('@/services/BidService');
+jest.mock('@/utils/getAPIErrorMessage');
 
 const getBidsMock = BidService.getBids as jest.MockedFunction<
   typeof BidService.getBids
@@ -28,60 +28,6 @@ const rejectBidMock = BidService.rejectBid as jest.MockedFunction<
 const getAPIErrorMessageMock = getAPIErrorMessage as jest.MockedFunction<
   typeof getAPIErrorMessage
 >;
-
-// Strictly typed helper to convert a function to a jest mock
-
-// Factories for domain types to avoid using `any`
-const makeClient = (overrides: Partial<Client> = {}): Client => ({
-  id: 1,
-  full_name: 'Test Client',
-  phone: '+10000000000',
-  telegram: '@test',
-  company: null,
-  address: null,
-  email: 'test@example.com',
-  ...overrides,
-});
-
-const makeBid = (overrides: Partial<Bid> = {}): Bid => ({
-  id: 1,
-  client: makeClient(),
-  brand: 'Brand',
-  model: 'Model',
-  vin: 'VIN0000000000000',
-  price: 0,
-  container_number: 'C123',
-  arrival_date: '2024-01-01',
-  transporter: 'transporter',
-  recipient: 'recipient',
-  transit_method: null,
-  location: null,
-  requested_title: false,
-  notified_parking: false,
-  notified_inspector: false,
-  openning_date: null,
-  approved_by_inspector: false,
-  approved_by_title: false,
-  approved_by_re_export: false,
-  opened: false,
-  manager_comment: null,
-  pickup_address: null,
-  title_collection_date: null,
-  took_title: null,
-  notified_logistician_by_title: false,
-  notified_logistician_by_inspector: false,
-  acceptance_date: null,
-  transit_number: null,
-  inspection_done: null,
-  inspection_date: null,
-  number_sent: false,
-  number_sent_date: null,
-  inspection_paid: false,
-  inspector_comment: null,
-  export: false,
-  prepared_documents: false,
-  ...overrides,
-});
 
 describe('BidStore', () => {
   const resetStore = () => {
