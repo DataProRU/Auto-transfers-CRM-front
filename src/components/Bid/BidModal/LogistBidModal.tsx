@@ -289,7 +289,11 @@ const LogistBidModal = ({ open, onClose }: LogistBidModalProps) => {
           </Button>
         </DialogActions>
       </Dialog>
-      <RejectBidModal data-testid='dialogRejectBidModal' open={rejectOpen} onClose={() => setRejectOpen(false)} />
+      <RejectBidModal
+        data-testid='dialogRejectBidModal'
+        open={rejectOpen}
+        onClose={() => setRejectOpen(false)}
+      />
     </>
   );
 };

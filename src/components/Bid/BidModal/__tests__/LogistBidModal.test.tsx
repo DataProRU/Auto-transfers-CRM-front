@@ -6,7 +6,6 @@ import bidStore from '@/store/BidStore';
 import type { Bid } from '@/models/BidResponse';
 import type { Client } from '@/models/UserResponse';
 
-// Типы для моков
 type MockBidStore = {
   bid: Bid | null;
   updateBid: jest.MockedFunction<typeof bidStore.updateBid>;
@@ -14,7 +13,6 @@ type MockBidStore = {
   setBidError: jest.MockedFunction<typeof bidStore.setBidError>;
 };
 
-// Мокаем BidStore
 jest.mock('@/store/BidStore', () => ({
   bid: null,
   updateBid: jest.fn(),
@@ -22,7 +20,6 @@ jest.mock('@/store/BidStore', () => ({
   setBidError: jest.fn(),
 }));
 
-// Мокаем Notification provider
 const mockedShowNotification = jest.fn();
 jest.mock('@/providers/Notification', () => ({
   useNotification: () => ({
@@ -30,7 +27,6 @@ jest.mock('@/providers/Notification', () => ({
   }),
 }));
 
-// Фабрики для создания тестовых данных
 const makeClient = (overrides: Partial<Client> = {}): Client => ({
   id: 1,
   full_name: 'Test Client',
@@ -82,7 +78,6 @@ const makeBid = (overrides: Partial<Bid> = {}): Bid => ({
   ...overrides,
 });
 
-// Типизированные моки
 const updateBidMock = bidStore.updateBid as jest.MockedFunction<
   typeof bidStore.updateBid
 >;
@@ -341,7 +336,6 @@ describe('LogistBidModal', () => {
       mockBidStore.bid = null;
       renderLogistBidModal();
 
-      // Пытаемся отправить форму
       await userEvent.click(screen.getByRole('button', { name: 'Сохранить' }));
 
       expect(updateBidMock).not.toHaveBeenCalled();

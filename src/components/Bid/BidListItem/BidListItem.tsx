@@ -52,6 +52,7 @@ const BidListItem = observer(({ bid }: BidListItemProps) => {
   return (
     <>
       <ListItem
+        data-testid={`bid-item-${bid.id}`}
         sx={{
           py: 2,
           cursor: 'pointer',
