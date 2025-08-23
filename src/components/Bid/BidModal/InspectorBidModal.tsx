@@ -99,6 +99,7 @@ const InspectorBidModal = ({ open, onClose }: InspectorModalProps) => {
   return (
     <>
       <Dialog
+        data-testid='dialogInspectorBidModal'
         open={open}
         onClose={onClose}
         component='form'

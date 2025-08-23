@@ -97,6 +97,7 @@ const OpeningManagerBidModal = ({
   return (
     <>
       <Dialog
+        data-testid='dialogOpeningManagerBidModal'
         open={open}
         onClose={onClose}
         component='form'

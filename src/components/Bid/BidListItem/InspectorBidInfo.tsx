@@ -9,7 +9,7 @@ interface InspectorBidInfoProps {
 
 const InspectorBidInfo = ({ bid }: InspectorBidInfoProps) => {
   return (
-    <Box sx={{ width: '100%' }}>
+    <Box data-testid='inspectorBidInfo' sx={{ width: '100%' }}>
       <Typography variant='subtitle1' fontWeight='bold'>
         {bid.brand} {bid.model}
       </Typography>
