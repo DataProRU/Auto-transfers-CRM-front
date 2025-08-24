@@ -1,10 +1,10 @@
 import { action, makeAutoObservable } from 'mobx';
-import type { Tranporter } from '../models/TranporterResponse';
-import TranporterService from '../services/TransporterService';
+import type { Transporter } from '../models/TransporterResponse';
+import TransporterService from '../services/TransporterService';
 import { getAPIErrorMessage } from '../utils/getAPIErrorMessage';
 
 class TransporterStore {
-  tranporters: Tranporter[] | [] = [];
+  transporters: Transporter[] | [] = [];
   isLoading: boolean = false;
   error: string | null = null;
 
@@ -12,8 +12,8 @@ class TransporterStore {
     makeAutoObservable(this);
   }
 
-  setTranporters = (transporters: Tranporter[] | []) => {
-    this.tranporters = transporters;
+  setTransporters = (transporters: Transporter[] | []) => {
+    this.transporters = transporters;
   };
 
   setIsLoading = (isLoading: boolean) => {
@@ -27,13 +27,13 @@ class TransporterStore {
   fetchTransporters = action(async () => {
     try {
       this.setIsLoading(true);
-      const response = await TranporterService.getTranporters();
+      const response = await TransporterService.getTransporters();
 
-      this.setTranporters(response.data);
+      this.setTransporters(response.data);
     } catch (e) {
       const message = getAPIErrorMessage(e);
       this.setError(message);
-      this.setTranporters([]);
+      this.setTransporters([]);
     } finally {
       this.setIsLoading(false);
     }

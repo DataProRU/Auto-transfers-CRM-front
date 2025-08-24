@@ -1,11 +1,11 @@
 import $api from '../setup/axios';
 
-class TranporterService {
-  static async getTranporters() {
+class TransporterService {
+  static async getTransporters() {
     return $api.get('/autotrips/transporters/', {
       headers: { 'Content-Type': 'application/json' },
     });
   }
 }
 
-export default TranporterService;
+export default TransporterService;

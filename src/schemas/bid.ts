@@ -75,3 +75,43 @@ export const ReExportBidFormSchema = z.object({
   export: z.boolean().optional(),
   prepared_documents: z.boolean().optional(),
 });
+
+export const RecieverBidFormSchema = z.object({
+  vehicle_arrival_date: z
+    .union([z.string(), z.null()])
+    .optional()
+    .superRefine((val, ctx) => {
+      if (val === null || val === undefined || val === '') {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'Примерная дата прибытия не может быть пустой',
+        });
+        return false;
+      }
+
+      if (!/^\d{2}\.\d{2}\.\d{4}$/.test(val)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'Дата должна быть в формате ДД.ММ.ГГГГ',
+        });
+        return false;
+      }
+
+      const [day, month, year] = val.split('.');
+      const date = new Date(`${year}-${month}-${day}`);
+      if (isNaN(date.getTime())) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'Некорректная дата',
+        });
+        return false;
+      }
+
+      return true;
+    })
+    .transform((val) => (val === '' ? null : val)),
+  receive_vehicle: z.boolean().optional(),
+  receive_documents: z.boolean().optional(),
+  full_acceptance: z.boolean().optional(),
+  receiver_keys_number: z.number().optional(),
+});

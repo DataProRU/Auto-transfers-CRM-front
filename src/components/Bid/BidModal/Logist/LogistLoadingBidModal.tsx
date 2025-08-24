@@ -29,9 +29,9 @@ import InputLabel from '@mui/material/InputLabel';
 import Select from '@mui/material/Select';
 import { MenuItem } from '@mui/material';
 import Combobox from '../../../UI/Combobox';
-import transporterStore from '../../../../store/TranporterStore';
 import { observer } from 'mobx-react-lite';
-import type { Tranporter } from '../../../../models/TranporterResponse';
+import type { Transporter } from '../../../../models/TransporterResponse';
+import transporterStore from '../../../../store/TransporterStore';
 
 interface LogistLoadingModalProps {
   open: boolean;
@@ -41,19 +41,18 @@ interface LogistLoadingModalProps {
 const LogistLoadingBidModal = observer(
   ({ open, onClose }: LogistLoadingModalProps) => {
     const { bid, updateBid, bidError, setBidError } = bidStore;
-    const { tranporters, fetchTransporters, isLoading } = transporterStore;
+    const { transporters, fetchTransporters, isLoading } = transporterStore;
     const { showNotification } = useNotification();
 
     const {
       handleSubmit,
       reset,
-      register,
       control,
       formState: { errors },
     } = useForm<LogistBidLoadingFormData>({
       resolver: zodResolver(logistbidLoadingFormSchema),
       defaultValues: {
-        vehicle_transporter: (bid?.vehicle_transporter as Tranporter)?.id,
+        vehicle_transporter: (bid?.vehicle_transporter as Transporter)?.id,
         logistician_keys_number: bid?.logistician_keys_number || 0,
       },
     });
@@ -68,7 +67,7 @@ const LogistLoadingBidModal = observer(
     useEffect(() => {
       if (bid) {
         reset({
-          vehicle_transporter: (bid?.vehicle_transporter as Tranporter)?.id,
+          vehicle_transporter: (bid?.vehicle_transporter as Transporter)?.id,
           logistician_keys_number: bid?.logistician_keys_number || 0,
         });
       }
@@ -76,10 +75,12 @@ const LogistLoadingBidModal = observer(
 
     const onSubmit = async (data: LogistBidLoadingFormData) => {
       if (bid) {
+        const inProgressCondition =
+          !!data.vehicle_transporter && data.logistician_keys_number !== 0;
         const isSuccess = await updateBid(
           bid.id,
           data,
-          data.vehicle_transporter && data.logistician_keys_number !== 0,
+          inProgressCondition,
           'loading'
         );
         if (isSuccess) {
@@ -136,7 +137,7 @@ const LogistLoadingBidModal = observer(
                         variant='outlined'
                         fullWidth
                         disabled
-                        value={bid?.brand}
+                        value={bid?.brand || ''}
                       />
                       <TextField
                         label='Модель'
@@ -144,7 +145,7 @@ const LogistLoadingBidModal = observer(
                         variant='outlined'
                         fullWidth
                         disabled
-                        value={bid?.model}
+                        value={bid?.model || ''}
                       />
                       <TextField
                         label='Клиент'
@@ -152,7 +153,7 @@ const LogistLoadingBidModal = observer(
                         variant='outlined'
                         fullWidth
                         disabled
-                        value={bid?.client.full_name}
+                        value={bid?.client.full_name || ''}
                       />
                       <TextField
                         label='VIN'
@@ -160,28 +161,32 @@ const LogistLoadingBidModal = observer(
                         variant='outlined'
                         fullWidth
                         disabled
-                        value={bid?.vin}
+                        value={bid?.vin || ''}
                       />
                       <TextField
                         label='Номер контейнера'
                         id='container_number'
                         variant='outlined'
                         disabled
-                        value={bid?.container_number}
+                        value={bid?.container_number || ''}
                       />
                       <TextField
                         label='Предпологаемая дата прибытия контейнера'
                         id='arrivalDate'
                         variant='outlined'
                         disabled
-                        value={moment(bid?.arrival_date).format('DD.MM.YYYY')}
+                        value={
+                          moment(bid?.arrival_date).format('DD.MM.YYYY') || ''
+                        }
                       />
                       <TextField
                         label='Предпологаемая дата открытия контейнера'
                         id='openning_date'
                         variant='outlined'
                         disabled
-                        value={moment(bid?.openning_date).format('DD.MM.YYYY')}
+                        value={
+                          moment(bid?.openning_date).format('DD.MM.YYYY') || ''
+                        }
                       />
                       <TextField
                         label='Получатель'
@@ -189,14 +194,14 @@ const LogistLoadingBidModal = observer(
                         variant='outlined'
                         fullWidth
                         disabled
-                        value={bid?.recipient}
+                        value={bid?.recipient || ''}
                       />
                       <TextField
                         label='Перевозчик'
                         id='transporter'
                         variant='outlined'
                         disabled
-                        value={bid?.transporter}
+                        value={bid?.transporter || ''}
                       />
                       <TextField
                         label='Метод транзита'
@@ -211,7 +216,7 @@ const LogistLoadingBidModal = observer(
                         variant='outlined'
                         fullWidth
                         disabled
-                        value={bid?.location}
+                        value={bid?.location || ''}
                       />
                       <BidCheckbox
                         checked={bid?.approved_by_inspector || false}
@@ -249,7 +254,7 @@ const LogistLoadingBidModal = observer(
                         variant='outlined'
                         fullWidth
                         disabled
-                        value={bid?.v_type.v_type}
+                        value={bid?.v_type.v_type || ''}
                       />
                     </Stack>
                   </AccordionDetails>
@@ -263,42 +268,48 @@ const LogistLoadingBidModal = observer(
                         field.onChange(selectedId);
                       }}
                       fetchOptions={fetchTransporters}
-                      options={tranporters}
+                      options={transporters}
                       isLoading={isLoading}
                       label='Автовоз'
                       width='100%'
                       value={field.value}
                       error={!!fieldState.error}
                       helperText={fieldState.error?.message}
-                      getOptionLabel={(item: Tranporter) =>
+                      getOptionLabel={(item: Transporter) =>
                         `${item.number || ''}`
                       }
-                      initialData={bid?.vehicle_transporter as Tranporter}
+                      initialData={bid?.vehicle_transporter as Transporter}
                     />
                   )}
                 />
-                <FormControl fullWidth>
-                  <InputLabel id='logistician_keys_number'>
-                    Отправлено ключей
-                  </InputLabel>
-                  <Select
-                    labelId=''
-                    id='logistician_keys_number'
-                    label='Отправлено logistician_keys_number'
-                    {...register('logistician_keys_number')}
-                    defaultValue={bid?.logistician_keys_number || 0}
-                  >
-                    <MenuItem value={0}>0</MenuItem>
-                    <MenuItem value={1}>1</MenuItem>
-                    <MenuItem value={2}>2</MenuItem>
-                    <MenuItem value={3}>3</MenuItem>
-                  </Select>
-                  {errors.logistician_keys_number && (
-                    <Typography color='error' variant='caption'>
-                      {errors.logistician_keys_number.message}
-                    </Typography>
+                <Controller
+                  name='logistician_keys_number'
+                  control={control}
+                  render={({ field }) => (
+                    <FormControl fullWidth>
+                      <InputLabel id='logistician_keys_number'>
+                        Отправлено ключей
+                      </InputLabel>
+                      <Select
+                        labelId='logistician_keys_number'
+                        id='logistician_keys_number'
+                        label='Отправлено ключей'
+                        value={field.value || 0}
+                        onChange={field.onChange}
+                      >
+                        <MenuItem value={0}>0</MenuItem>
+                        <MenuItem value={1}>1</MenuItem>
+                        <MenuItem value={2}>2</MenuItem>
+                        <MenuItem value={3}>3</MenuItem>
+                      </Select>
+                      {errors.logistician_keys_number && (
+                        <Typography color='error' variant='caption'>
+                          {errors.logistician_keys_number.message}
+                        </Typography>
+                      )}
+                    </FormControl>
                   )}
-                </FormControl>
+                />
               </Stack>
             </LocalizationProvider>
           </DialogContent>

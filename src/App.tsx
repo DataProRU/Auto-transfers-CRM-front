@@ -5,12 +5,12 @@ import { authStore } from './store/AuthStore';
 import CircularProgress from '@mui/material/CircularProgress';
 import ProtectedRoute from './components/Page/ProtectedRoute';
 import Header from './components/Header/Header';
-import DefaultRequests from './pages/DefaultRequests';
 
 const Loading = lazy(() => import('./pages/Logist/Loading'));
 const CarTransporter = lazy(() => import('./pages/Logist/CarTrasporter'));
 const EditRequests = lazy(() => import('./pages/Logist/EditRequests'));
 const Auth = lazy(() => import('./pages/Auth'));
+const DefaultRequests = lazy(() => import('./pages/DefaultRequests'));
 const ExpandedRequests = lazy(() => import('./pages/ExpandedRequests'));
 
 const App = observer(() => {

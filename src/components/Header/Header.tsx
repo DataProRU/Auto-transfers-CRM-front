@@ -28,7 +28,7 @@ const getRole = (role: string) => {
     case 're_export':
       return 'Реэспорт';
     default:
-      return 'Пользователь';
+      return 'Приемщик';
   }
 };
 

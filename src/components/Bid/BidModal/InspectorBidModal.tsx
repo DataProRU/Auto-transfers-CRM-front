@@ -86,14 +86,11 @@ const InspectorBidModal = ({ open, onClose }: InspectorModalProps) => {
         number_sent_date:
           data.number_sent === true ? moment().format('YYYY-MM-DD') : null,
       };
-      const isSuccess = await updateBid(
-        bid.id,
-        payload,
+      const inProgressCondition =
         (bid?.transit_method === 'without_openning' &&
-          payload.notified_logistician_by_inspector === true) ||
-          (bid?.transit_method === 're_export' &&
-            payload.inspection_done === 'yes')
-      );
+          data.notified_logistician_by_inspector === true) ||
+        (bid?.transit_method === 're_export' && data.inspection_done === 'yes');
+      const isSuccess = await updateBid(bid.id, payload, inProgressCondition);
       if (isSuccess) {
         showNotification('Данные успешно изменены!', 'success');
         onClose();
@@ -146,7 +143,7 @@ const InspectorBidModal = ({ open, onClose }: InspectorModalProps) => {
                       variant='outlined'
                       fullWidth
                       disabled
-                      value={bid?.brand}
+                      value={bid?.brand || ''}
                     />
                     <TextField
                       label='Модель'
@@ -154,7 +151,7 @@ const InspectorBidModal = ({ open, onClose }: InspectorModalProps) => {
                       variant='outlined'
                       fullWidth
                       disabled
-                      value={bid?.model}
+                      value={bid?.model || ''}
                     />
                     <TextField
                       label='Местонахождение'
@@ -162,7 +159,7 @@ const InspectorBidModal = ({ open, onClose }: InspectorModalProps) => {
                       variant='outlined'
                       fullWidth
                       disabled
-                      value={bid?.location}
+                      value={bid?.location || ''}
                     />
                     <TextField
                       label='Дата принятия'
@@ -186,26 +183,37 @@ const InspectorBidModal = ({ open, onClose }: InspectorModalProps) => {
                 error={!!errors.transit_number}
                 helperText={errors.transit_number?.message}
               />
-              <FormControl fullWidth>
-                <InputLabel id='inspection_done'>Сделан ли осмотр</InputLabel>
-                <Select
-                  labelId='inspection_done'
-                  id='inspection_done'
-                  label='Сделан ли осмотр'
-                  {...register('inspection_done')}
-                  defaultValue={bid?.inspection_done || 'no'}
-                >
-                  <MenuItem value={'no'}>Нет</MenuItem>
-                  <MenuItem value={'yes'}>Да</MenuItem>
-                  <MenuItem value={'consignment'}>Нужен осмотр</MenuItem>
-                  <MenuItem value={'consignment'}>Нужна экспертиза</MenuItem>
-                </Select>
-                {errors.inspection_done && (
-                  <Typography color='error' variant='caption'>
-                    {errors.inspection_done.message}
-                  </Typography>
+              <Controller
+                name='inspection_done'
+                control={control}
+                render={({ field }) => (
+                  <FormControl fullWidth>
+                    <InputLabel id='inspection_done'>
+                      Сделан ли осмотр
+                    </InputLabel>
+                    <Select
+                      labelId='inspection_done'
+                      id='inspection_done'
+                      label='Сделан ли осмотр'
+                      value={field.value || ''}
+                      onChange={field.onChange}
+                    >
+                      <MenuItem value={'no'}>Нет</MenuItem>
+                      <MenuItem value={'yes'}>Да</MenuItem>
+                      <MenuItem value={'consignment'}>Нужен осмотр</MenuItem>
+                      <MenuItem value={'consignment'}>
+                        Нужна экспертиза
+                      </MenuItem>
+                    </Select>
+                    {errors.inspection_done && (
+                      <Typography color='error' variant='caption'>
+                        {errors.inspection_done.message}
+                      </Typography>
+                    )}
+                  </FormControl>
                 )}
-              </FormControl>
+              />
+
               <TextField
                 label='Дата осмотра'
                 id='inspection_date'

@@ -4,6 +4,7 @@ import type {
   InspectorBidFormSchema,
   logistbidLoadingFormSchema,
   OpeningManagerBidFormSchema,
+  RecieverBidFormSchema,
   ReExportBidFormSchema,
   rejectBidFormSchema,
   TitleBidFormSchema,
@@ -26,3 +27,5 @@ export type TitleBidFormData = z.infer<typeof TitleBidFormSchema>;
 export type InspectorBidFormData = z.infer<typeof InspectorBidFormSchema>;
 
 export type ReExportBidFormData = z.infer<typeof ReExportBidFormSchema>;
+
+export type RecieverBidFormData = z.infer<typeof RecieverBidFormSchema>;

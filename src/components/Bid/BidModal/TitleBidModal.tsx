@@ -34,7 +34,7 @@ interface TitleModalProps {
 }
 
 const TitleBidModal = ({ open, onClose }: TitleModalProps) => {
-  const { bid, updateTitleBid, bidError, setBidError } = bidStore;
+  const { bid, updateExpandedBid, bidError, setBidError } = bidStore;
   const { showNotification } = useNotification();
 
   const {
@@ -80,7 +80,15 @@ const TitleBidModal = ({ open, onClose }: TitleModalProps) => {
             ? moment().format('YYYY-MM-DD')
             : null,
       };
-      const isSuccess = await updateTitleBid(bid.id, payload);
+      const inProgressCondition = data.notified_logistician_by_title === true;
+      const completedCondition =
+        data.took_title === 'yes' || data.took_title === 'consignment';
+      const isSuccess = await updateExpandedBid(
+        bid.id,
+        payload,
+        inProgressCondition,
+        completedCondition
+      );
       if (isSuccess) {
         showNotification('Данные успешно изменены!', 'success');
         onClose();
@@ -133,7 +141,7 @@ const TitleBidModal = ({ open, onClose }: TitleModalProps) => {
                       variant='outlined'
                       fullWidth
                       disabled
-                      value={bid?.brand}
+                      value={bid?.brand || ''}
                     />
                     <TextField
                       label='Модель'
@@ -141,7 +149,7 @@ const TitleBidModal = ({ open, onClose }: TitleModalProps) => {
                       variant='outlined'
                       fullWidth
                       disabled
-                      value={bid?.model}
+                      value={bid?.model || ''}
                     />
                     <TextField
                       label='VIN'
@@ -149,11 +157,11 @@ const TitleBidModal = ({ open, onClose }: TitleModalProps) => {
                       variant='outlined'
                       fullWidth
                       disabled
-                      value={bid?.vin}
+                      value={bid?.vin || ''}
                     />
                     <TextField
                       label='Комментарий менеджера'
-                      id='reason'
+                      id='manager_comment'
                       variant='outlined'
                       disabled
                       multiline
