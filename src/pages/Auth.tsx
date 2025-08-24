@@ -13,6 +13,7 @@ import { useNotification } from '../providers/Notification';
 import { authStore } from '../store/AuthStore';
 import { authSchema } from '../schemas/auth';
 import type { AuthFormData } from '../@types/auth';
+import { MuiTelInput } from 'mui-tel-input';
 
 const Auth = () => {
   const { showNotification } = useNotification();
@@ -28,14 +29,23 @@ const Auth = () => {
   const {
     register,
     handleSubmit,
+    watch,
+    setValue,
     formState: { errors },
   } = useForm<AuthFormData>({
     resolver: zodResolver(authSchema),
   });
 
+  const phoneValue = watch('login');
+
+  const handlePhoneChange = (newPhone: string) => {
+    setValue('login', newPhone, { shouldValidate: true });
+  };
+
   const onSubmit = async (data: AuthFormData) => {
     try {
-      await login(data.login, data.password);
+      const cleanedLogin = data.login.replaceAll(' ', '');
+      await login(cleanedLogin, data.password);
       navigate('/');
     } catch {
       if (authError) {
@@ -74,15 +84,23 @@ const Auth = () => {
 
           <Box component='form' onSubmit={handleSubmit(onSubmit)}>
             <Stack spacing={2}>
-              <TextField
-                label='Логин/Номер телефона'
+              <MuiTelInput
+                label='Номер телефона / Логин'
                 variant='outlined'
                 fullWidth
                 required
                 autoFocus
+                value={phoneValue || ''}
+                onChange={handlePhoneChange}
                 error={!!errors.login}
                 helperText={errors.login?.message}
-                {...register('login')}
+                defaultCountry='RU'
+                langOfCountryName='ru'
+                sx={{
+                  '& .MuiTelInput-Flag': {
+                    borderRadius: '4px',
+                  },
+                }}
               />
               <TextField
                 label='Пароль'

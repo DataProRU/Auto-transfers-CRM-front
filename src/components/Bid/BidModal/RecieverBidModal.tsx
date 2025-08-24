@@ -1,9 +1,17 @@
-import { useEffect } from 'react';
+import { Controller, useForm } from 'react-hook-form';
 import { useNotification } from '../../../providers/Notification';
 import bidStore from '../../../store/BidStore';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useEffect } from 'react';
+import type { RecieverBidFormData } from '../../../@types/bid';
+import { RecieverBidFormSchema } from '../../../schemas/bid';
+import moment from 'moment';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment';
+import { ruRU } from '@mui/x-date-pickers/locales';
 import DialogContentText from '@mui/material/DialogContentText';
 import Stack from '@mui/material/Stack';
 import Accordion from '@mui/material/Accordion';
@@ -12,32 +20,25 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Typography from '@mui/material/Typography';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import TextField from '@mui/material/TextField';
-import moment from 'moment';
-import { Controller, useForm } from 'react-hook-form';
-import type { OpeningManagerBidFormData } from '../../../@types/bid';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { OpeningManagerBidFormSchema } from '../../../schemas/bid';
+import type { Transporter } from '../../../models/TransporterResponse';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import BidCheckbox from '../BidCheckBox';
 import DialogActions from '@mui/material/DialogActions';
 import Button from '@mui/material/Button';
-import { getTransitMethod } from '../../../utils/getTransitMethod';
-import BidCheckbox from '../BidCheckBox';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { ruRU } from '@mui/x-date-pickers/locales';
+import FormControl from '@mui/material/FormControl';
+import InputLabel from '@mui/material/InputLabel';
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
 
 moment.locale('ru');
 
-interface OpeningManagerModalProps {
+interface RecieverModalProps {
   open: boolean;
   onClose: () => void;
 }
 
-const OpeningManagerBidModal = ({
-  open,
-  onClose,
-}: OpeningManagerModalProps) => {
-  const { bid, updateBid, bidError, setBidError } = bidStore;
+const RecieverBidModal = ({ open, onClose }: RecieverModalProps) => {
+  const { bid, updateExpandedBid, bidError, setBidError } = bidStore;
   const { showNotification } = useNotification();
 
   const {
@@ -46,14 +47,16 @@ const OpeningManagerBidModal = ({
     formState: { errors },
     control,
     reset,
-  } = useForm<OpeningManagerBidFormData>({
-    resolver: zodResolver(OpeningManagerBidFormSchema),
+  } = useForm<RecieverBidFormData>({
+    resolver: zodResolver(RecieverBidFormSchema),
     defaultValues: {
-      openning_date: bid?.openning_date
-        ? moment(bid.openning_date).format('DD.MM.YYYY')
+      vehicle_arrival_date: bid?.vehicle_arrival_date
+        ? moment(bid.vehicle_arrival_date).format('DD.MM.YYYY')
         : null,
-      manager_comment: bid?.manager_comment || '',
-      opened: bid?.opened || false,
+      receive_vehicle: bid?.receive_vehicle || false,
+      receive_documents: bid?.receive_documents || false,
+      full_acceptance: bid?.full_acceptance || false,
+      receiver_keys_number: bid?.receiver_keys_number || 0,
     },
   });
 
@@ -67,24 +70,36 @@ const OpeningManagerBidModal = ({
   useEffect(() => {
     if (bid) {
       reset({
-        openning_date: bid?.openning_date
-          ? moment(bid.openning_date).format('DD.MM.YYYY')
+        vehicle_arrival_date: bid?.vehicle_arrival_date
+          ? moment(bid.vehicle_arrival_date).format('DD.MM.YYYY')
           : null,
-        manager_comment: bid?.manager_comment || '',
-        opened: bid?.opened || false,
+        receive_vehicle: bid?.receive_vehicle || false,
+        receive_documents: bid?.receive_documents || false,
+        full_acceptance: bid?.full_acceptance || false,
+        receiver_keys_number: bid?.receiver_keys_number || 0,
       });
     }
   }, [bid, reset]);
 
-  const onSubmit = async (data: OpeningManagerBidFormData) => {
+  const onSubmit = async (data: RecieverBidFormData) => {
     if (bid) {
       const convertedData = {
         ...data,
-        openning_date: data.openning_date
-          ? moment(data.openning_date, 'DD.MM.YYYY').format('YYYY-MM-DD')
+        vehicle_arrival_date: data.vehicle_arrival_date
+          ? moment(data.vehicle_arrival_date, 'DD.MM.YYYY').format('YYYY-MM-DD')
           : null,
       };
-      const isSuccess = await updateBid(bid.id, convertedData, true);
+      const inProgressCondition =
+        convertedData.vehicle_arrival_date ===
+        moment().add(1, 'days').format('YYYY-MM-DD');
+
+      const completedCondition = data.full_acceptance === true;
+      const isSuccess = await updateExpandedBid(
+        bid.id,
+        convertedData,
+        inProgressCondition,
+        completedCondition
+      );
       if (isSuccess) {
         showNotification('Данные успешно изменены!', 'success');
         onClose();
@@ -157,51 +172,23 @@ const OpeningManagerBidModal = ({
                     />
 
                     <TextField
-                      label='Номер контейнера'
-                      id='fatherName'
-                      variant='outlined'
-                      disabled
-                      value={bid?.container_number || ''}
-                    />
-                    <TextField
-                      label='Предпологаемая дата прибытия контейнера'
-                      id='arrivalDate'
+                      label='Номер автовоза'
+                      id='vehicle_transporter_number'
                       variant='outlined'
                       disabled
                       value={
-                        moment(bid?.arrival_date).format('DD.MM.YYYY') || ''
+                        (bid?.vehicle_transporter as Transporter)?.number || ''
                       }
-                    />
-                    <TextField
-                      label='Получатель'
-                      id='recipient'
-                      variant='outlined'
-                      disabled
-                      value={bid?.recipient || ''}
-                    />
-                    <TextField
-                      label='Перевозчик'
-                      id='transporter'
-                      variant='outlined'
-                      disabled
-                      value={bid?.transporter || ''}
-                    />
-                    <TextField
-                      label='Метод тразита'
-                      id='transit_method'
-                      variant='outlined'
-                      disabled
-                      value={getTransitMethod(bid?.transit_method || '')}
                     />
                   </Stack>
                 </AccordionDetails>
               </Accordion>
               <Controller
-                name='openning_date'
+                name='vehicle_arrival_date'
                 control={control}
                 render={({ field, fieldState: { error } }) => (
                   <DatePicker
-                    label='Предполагаемая дата открытия контейнера'
+                    label='Примерная дата прибытия'
                     value={
                       field.value ? moment(field.value, 'DD.MM.YYYY') : null
                     }
@@ -219,26 +206,59 @@ const OpeningManagerBidModal = ({
                   />
                 )}
               />
-              <TextField
-                id='comment'
-                label='Комментарий'
-                multiline
-                maxRows={4}
-                {...register('manager_comment')}
-                error={!!errors.manager_comment}
-                helperText={errors.manager_comment?.message}
-              />
               <Controller
-                name='opened'
+                name='receive_vehicle'
                 control={control}
                 render={({ field }) => (
                   <BidCheckbox
                     checked={field.value || false}
-                    label='Открыто'
+                    label='Принял автомобиль'
                     onChange={field.onChange}
                   />
                 )}
               />
+              <Controller
+                name='receive_documents'
+                control={control}
+                render={({ field }) => (
+                  <BidCheckbox
+                    checked={field.value || false}
+                    label='Принял документы'
+                    onChange={field.onChange}
+                  />
+                )}
+              />
+              <Controller
+                name='full_acceptance'
+                control={control}
+                render={({ field }) => (
+                  <BidCheckbox
+                    checked={field.value || false}
+                    label='Полное принятие'
+                    onChange={field.onChange}
+                  />
+                )}
+              />
+              <FormControl fullWidth>
+                <InputLabel id='receiver_keys_number'>Принял ключей</InputLabel>
+                <Select
+                  labelId=''
+                  id='receiver_keys_number'
+                  label='Принял ключей'
+                  {...register('receiver_keys_number')}
+                  defaultValue={bid?.logistician_keys_number || 0}
+                >
+                  <MenuItem value={0}>0</MenuItem>
+                  <MenuItem value={1}>1</MenuItem>
+                  <MenuItem value={2}>2</MenuItem>
+                  <MenuItem value={3}>3</MenuItem>
+                </Select>
+                {errors.receiver_keys_number && (
+                  <Typography color='error' variant='caption'>
+                    {errors.receiver_keys_number.message}
+                  </Typography>
+                )}
+              </FormControl>
             </Stack>
           </LocalizationProvider>
         </DialogContent>
@@ -253,4 +273,4 @@ const OpeningManagerBidModal = ({
   );
 };
 
-export default OpeningManagerBidModal;
+export default RecieverBidModal;

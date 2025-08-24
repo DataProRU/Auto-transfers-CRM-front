@@ -1,4 +1,4 @@
-import type { Tranporter } from './TranporterResponse';
+import type { Transporter } from './TransporterResponse';
 import type { Client } from './UserResponse';
 
 export interface VehicleType {
@@ -44,6 +44,11 @@ export interface Bid {
   inspector_comment: string | null;
   export: boolean;
   prepared_documents: boolean;
-  vehicle_transporter: Tranporter | number;
+  vehicle_transporter: Transporter | number;
   logistician_keys_number: number;
+  vehicle_arrival_date: string | null;
+  receive_vehicle: boolean;
+  receive_documents: boolean;
+  full_acceptance: boolean;
+  receiver_keys_number: number;
 }

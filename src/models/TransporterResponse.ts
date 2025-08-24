@@ -1,4 +1,4 @@
-export interface Tranporter {
+export interface Transporter {
   id: number;
   number: string;
 }

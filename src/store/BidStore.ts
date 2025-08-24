@@ -1,4 +1,4 @@
-import { makeAutoObservable } from 'mobx';
+import { action, makeAutoObservable } from 'mobx';
 import { getAPIErrorMessage } from '../utils/getAPIErrorMessage';
 import BidService from '../services/BidService';
 import type {
@@ -6,6 +6,7 @@ import type {
   InspectorBidFormData,
   LogistBidLoadingFormData,
   OpeningManagerBidFormData,
+  RecieverBidFormData,
   ReExportBidFormData,
   RejectBidFormData,
   TitleBidFormData,
@@ -85,7 +86,7 @@ class BidStore {
       | OpeningManagerBidFormData
       | InspectorBidFormData
       | LogistBidLoadingFormData,
-    field: unknown,
+    inProgressCondition: boolean,
     status: string | null = null
   ) => {
     try {
@@ -93,7 +94,7 @@ class BidStore {
       const response = await BidService.changeBid(id, data, status);
       const updatedData = response.data;
 
-      if (field !== false || (field !== null && typeof field !== 'boolean')) {
+      if (inProgressCondition) {
         const movedBid = this.untouchedBids.find((bid) => bid.id === id);
         if (movedBid) {
           const updatedUntouched = this.untouchedBids.filter(
@@ -137,151 +138,86 @@ class BidStore {
     }
   };
 
-  updateTitleBid = async (id: number, data: TitleBidFormData) => {
-    try {
-      this.setBidError(null);
-      await BidService.changeBid(id, data);
+  updateExpandedBid = action(
+    async (
+      id: number,
+      data: TitleBidFormData | ReExportBidFormData | RecieverBidFormData,
+      inProgressCondition: boolean,
+      completedCondition: boolean,
+      status: string | null = null
+    ) => {
+      try {
+        this.setBidError(null);
+        await BidService.changeBid(id, data, status);
 
-      if (data.notified_logistician_by_title === true) {
-        if (data.took_title === 'yes' || data.took_title === 'consignment') {
-          const movedBid =
-            this.untouchedBids.find((bid) => bid.id === id) ||
-            this.inProgressBids.find((bid) => bid.id === id);
+        if (inProgressCondition) {
+          if (completedCondition) {
+            const movedBid =
+              this.untouchedBids.find((bid) => bid.id === id) ||
+              this.inProgressBids.find((bid) => bid.id === id);
 
+            if (movedBid) {
+              const updatedUntouched = this.untouchedBids.filter(
+                (bid) => bid.id !== id
+              );
+              this.setuntouchedBids(updatedUntouched);
+
+              const updatedInProgress = this.inProgressBids.filter(
+                (bid) => bid.id !== id
+              );
+              this.setInProgressBids(updatedInProgress);
+
+              this.setCompletedBids([
+                ...this.сompletedBids,
+                { ...movedBid, ...data },
+              ]);
+            } else {
+              const updatedCompleted = this.сompletedBids.map((bid) =>
+                bid.id === id ? { ...bid, ...data } : bid
+              );
+              this.setCompletedBids(updatedCompleted);
+            }
+          } else {
+            const movedBid = this.untouchedBids.find((bid) => bid.id === id);
+            if (movedBid) {
+              const updatedUntouched = this.untouchedBids.filter(
+                (bid) => bid.id !== id
+              );
+              this.setuntouchedBids(updatedUntouched);
+
+              this.setInProgressBids([
+                ...this.inProgressBids,
+                { ...movedBid, ...data },
+              ]);
+            } else {
+              const updatedInProgress = this.inProgressBids.map((bid) =>
+                bid.id === id ? { ...bid, ...data } : bid
+              );
+              this.setInProgressBids(updatedInProgress);
+            }
+          }
+        } else {
+          const movedBid = this.inProgressBids.find((bid) => bid.id === id);
           if (movedBid) {
-            const updatedUntouched = this.untouchedBids.filter(
-              (bid) => bid.id !== id
-            );
-            this.setuntouchedBids(updatedUntouched);
-
             const updatedInProgress = this.inProgressBids.filter(
               (bid) => bid.id !== id
             );
             this.setInProgressBids(updatedInProgress);
 
-            this.setCompletedBids([
-              ...this.сompletedBids,
+            this.setuntouchedBids([
+              ...this.untouchedBids,
               { ...movedBid, ...data },
             ]);
-          } else {
-            const updatedCompleted = this.сompletedBids.map((bid) =>
-              bid.id === id ? { ...bid, ...data } : bid
-            );
-            this.setCompletedBids(updatedCompleted);
-          }
-        } else {
-          const movedBid = this.untouchedBids.find((bid) => bid.id === id);
-          if (movedBid) {
-            const updatedUntouched = this.untouchedBids.filter(
-              (bid) => bid.id !== id
-            );
-            this.setuntouchedBids(updatedUntouched);
-
-            this.setInProgressBids([
-              ...this.inProgressBids,
-              { ...movedBid, ...data },
-            ]);
-          } else {
-            const updatedInProgress = this.inProgressBids.map((bid) =>
-              bid.id === id ? { ...bid, ...data } : bid
-            );
-            this.setInProgressBids(updatedInProgress);
           }
         }
-      } else {
-        const movedBid = this.inProgressBids.find((bid) => bid.id === id);
-        if (movedBid) {
-          const updatedInProgress = this.inProgressBids.filter(
-            (bid) => bid.id !== id
-          );
-          this.setInProgressBids(updatedInProgress);
-
-          this.setuntouchedBids([
-            ...this.untouchedBids,
-            { ...movedBid, ...data },
-          ]);
-        }
+        return true;
+      } catch (e) {
+        const message = getAPIErrorMessage(e);
+        this.setBidError(message);
+        return false;
       }
-      return true;
-    } catch (e) {
-      const message = getAPIErrorMessage(e);
-      this.setBidError(message);
-      return false;
     }
-  };
-
-  updateReExportBid = async (id: number, data: ReExportBidFormData) => {
-    try {
-      this.setBidError(null);
-      await BidService.changeBid(id, data);
-
-      if (data.prepared_documents === true) {
-        if (data.export) {
-          const movedBid =
-            this.untouchedBids.find((bid) => bid.id === id) ||
-            this.inProgressBids.find((bid) => bid.id === id);
-
-          if (movedBid) {
-            const updatedUntouched = this.untouchedBids.filter(
-              (bid) => bid.id !== id
-            );
-            this.setuntouchedBids(updatedUntouched);
-
-            const updatedInProgress = this.inProgressBids.filter(
-              (bid) => bid.id !== id
-            );
-            this.setInProgressBids(updatedInProgress);
-
-            this.setCompletedBids([
-              ...this.сompletedBids,
-              { ...movedBid, ...data },
-            ]);
-          } else {
-            const updatedCompleted = this.сompletedBids.map((bid) =>
-              bid.id === id ? { ...bid, ...data } : bid
-            );
-            this.setCompletedBids(updatedCompleted);
-          }
-        } else {
-          const movedBid = this.untouchedBids.find((bid) => bid.id === id);
-          if (movedBid) {
-            const updatedUntouched = this.untouchedBids.filter(
-              (bid) => bid.id !== id
-            );
-            this.setuntouchedBids(updatedUntouched);
-
-            this.setInProgressBids([
-              ...this.inProgressBids,
-              { ...movedBid, ...data },
-            ]);
-          } else {
-            const updatedInProgress = this.inProgressBids.map((bid) =>
-              bid.id === id ? { ...bid, ...data } : bid
-            );
-            this.setInProgressBids(updatedInProgress);
-          }
-        }
-      } else {
-        const movedBid = this.inProgressBids.find((bid) => bid.id === id);
-        if (movedBid) {
-          const updatedInProgress = this.inProgressBids.filter(
-            (bid) => bid.id !== id
-          );
-          this.setInProgressBids(updatedInProgress);
-
-          this.setuntouchedBids([
-            ...this.untouchedBids,
-            { ...movedBid, ...data },
-          ]);
-        }
-      }
-      return true;
-    } catch (e) {
-      const message = getAPIErrorMessage(e);
-      this.setBidError(message);
-      return false;
-    }
-  };
+  );
 
   rejectBid = async (id: number, data: RejectBidFormData) => {
     try {

@@ -30,7 +30,7 @@ interface ReExportModalProps {
 }
 
 const ReExportBidModal = ({ open, onClose }: ReExportModalProps) => {
-  const { bid, updateReExportBid, bidError, setBidError } = bidStore;
+  const { bid, updateExpandedBid, bidError, setBidError } = bidStore;
   const { showNotification } = useNotification();
 
   const { handleSubmit, control, reset } = useForm<ReExportBidFormData>({
@@ -59,7 +59,14 @@ const ReExportBidModal = ({ open, onClose }: ReExportModalProps) => {
 
   const onSubmit = async (data: ReExportBidFormData) => {
     if (bid) {
-      const isSuccess = await updateReExportBid(bid.id, data);
+      const inProgressCondition = data.prepared_documents === true;
+      const completedCondition = data.export === true;
+      const isSuccess = await updateExpandedBid(
+        bid.id,
+        data,
+        inProgressCondition,
+        completedCondition
+      );
       if (isSuccess) {
         showNotification('Данные успешно изменены!', 'success');
         onClose();
@@ -112,7 +119,7 @@ const ReExportBidModal = ({ open, onClose }: ReExportModalProps) => {
                       variant='outlined'
                       fullWidth
                       disabled
-                      value={bid?.brand}
+                      value={bid?.brand || ''}
                     />
                     <TextField
                       label='Модель'
@@ -120,7 +127,7 @@ const ReExportBidModal = ({ open, onClose }: ReExportModalProps) => {
                       variant='outlined'
                       fullWidth
                       disabled
-                      value={bid?.model}
+                      value={bid?.model || ''}
                     />
                     <TextField
                       label='VIN'
@@ -136,7 +143,7 @@ const ReExportBidModal = ({ open, onClose }: ReExportModalProps) => {
                       variant='outlined'
                       fullWidth
                       disabled
-                      value={bid?.recipient}
+                      value={bid?.recipient || ''}
                     />
                     <TextField
                       label='Цена автомобиля'
@@ -152,9 +159,11 @@ const ReExportBidModal = ({ open, onClose }: ReExportModalProps) => {
                       variant='outlined'
                       fullWidth
                       disabled
-                      value={moment(bid?.title_collection_date).format(
-                        'DD.MM.YYYY'
-                      )}
+                      value={
+                        moment(bid?.title_collection_date).format(
+                          'DD.MM.YYYY'
+                        ) || ''
+                      }
                     />
                   </Stack>
                 </AccordionDetails>

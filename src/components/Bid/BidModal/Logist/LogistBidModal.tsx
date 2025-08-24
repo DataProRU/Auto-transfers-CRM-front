@@ -81,7 +81,8 @@ const LogistBidModal = ({ open, onClose }: LogistBidModalProps) => {
 
   const onSubmit = async (data: BidFormData) => {
     if (bid) {
-      const isSuccess = await updateBid(bid.id, data, data.transit_method);
+      const inProgressCondition = !!data.transit_method;
+      const isSuccess = await updateBid(bid.id, data, inProgressCondition);
       if (isSuccess) {
         showNotification('Данные успешно изменены!', 'success');
         onClose();
@@ -127,7 +128,7 @@ const LogistBidModal = ({ open, onClose }: LogistBidModalProps) => {
                     variant='outlined'
                     fullWidth
                     disabled
-                    value={bid?.brand}
+                    value={bid?.brand || ''}
                   />
                   <TextField
                     label='Модель'
@@ -135,7 +136,7 @@ const LogistBidModal = ({ open, onClose }: LogistBidModalProps) => {
                     variant='outlined'
                     fullWidth
                     disabled
-                    value={bid?.model}
+                    value={bid?.model || ''}
                   />
                   <TextField
                     label='VIN'
@@ -143,7 +144,7 @@ const LogistBidModal = ({ open, onClose }: LogistBidModalProps) => {
                     variant='outlined'
                     fullWidth
                     disabled
-                    value={bid?.vin}
+                    value={bid?.vin || ''}
                   />
                   <TextField
                     label='Клиент'
@@ -151,18 +152,18 @@ const LogistBidModal = ({ open, onClose }: LogistBidModalProps) => {
                     variant='outlined'
                     fullWidth
                     disabled
-                    value={bid?.client.full_name}
+                    value={bid?.client.full_name || ''}
                   />
                   <TextField
                     label='Номер контейнера'
                     id='container_number'
                     variant='outlined'
                     disabled
-                    value={bid?.container_number}
+                    value={bid?.container_number || ''}
                   />
                   <TextField
                     label='Предпологаемая дата прибытия контейнера'
-                    id='arrivalDate'
+                    id='arrival_date'
                     variant='outlined'
                     disabled
                     value={
@@ -187,14 +188,14 @@ const LogistBidModal = ({ open, onClose }: LogistBidModalProps) => {
                     id='recipient'
                     variant='outlined'
                     disabled
-                    value={bid?.recipient}
+                    value={bid?.recipient || ''}
                   />
                   <TextField
                     label='Перевозчик'
                     id='transporter'
                     variant='outlined'
                     disabled
-                    value={bid?.transporter}
+                    value={bid?.transporter || ''}
                   />
                   <BidCheckbox
                     checked={bid?.approved_by_inspector || false}
@@ -215,26 +216,32 @@ const LogistBidModal = ({ open, onClose }: LogistBidModalProps) => {
               </AccordionDetails>
             </Accordion>
 
-            <FormControl fullWidth>
-              <InputLabel id='transit_method'>Метод транзита</InputLabel>
-              <Select
-                labelId='transit_method'
-                id='transit_method'
-                label='Метод транзита'
-                {...register('transit_method')}
-                defaultValue={bid?.transit_method || ''}
-              >
-                <MenuItem value={''}>Не выбрано</MenuItem>
-                <MenuItem value={'t1'}>Т1</MenuItem>
-                <MenuItem value={'re_export'}>Реэкспорт</MenuItem>
-                <MenuItem value={'without_openning'}>Без открытия</MenuItem>
-              </Select>
-              {errors.transit_method && (
-                <Typography color='error' variant='caption'>
-                  {errors.transit_method.message}
-                </Typography>
+            <Controller
+              name='transit_method'
+              control={control}
+              render={({ field }) => (
+                <FormControl fullWidth>
+                  <InputLabel id='transit_method'>Метод транзита</InputLabel>
+                  <Select
+                    labelId='transit_method'
+                    id='transit_method'
+                    label='Метод транзита'
+                    value={field.value || ''}
+                    onChange={field.onChange}
+                  >
+                    <MenuItem value={''}>Не выбрано</MenuItem>
+                    <MenuItem value={'t1'}>Т1</MenuItem>
+                    <MenuItem value={'re_export'}>Реэкспорт</MenuItem>
+                    <MenuItem value={'without_openning'}>Без открытия</MenuItem>
+                  </Select>
+                  {errors.transit_method && (
+                    <Typography color='error' variant='caption'>
+                      {errors.transit_method.message}
+                    </Typography>
+                  )}
+                </FormControl>
               )}
-            </FormControl>
+            />
             <TextField
               label='Местонахождение'
               id='location'

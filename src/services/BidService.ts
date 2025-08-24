@@ -3,6 +3,7 @@ import type {
   InspectorBidFormData,
   LogistBidLoadingFormData,
   OpeningManagerBidFormData,
+  RecieverBidFormData,
   ReExportBidFormData,
   RejectBidFormData,
   TitleBidFormData,
@@ -27,7 +28,8 @@ class BidService {
       | TitleBidFormData
       | InspectorBidFormData
       | ReExportBidFormData
-      | LogistBidLoadingFormData,
+      | LogistBidLoadingFormData
+      | RecieverBidFormData,
     status: string | null = null
   ) {
     return $api.put(`/autotrips/bids/${id}/`, data, {
