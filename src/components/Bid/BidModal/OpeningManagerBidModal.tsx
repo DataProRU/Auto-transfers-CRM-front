@@ -215,6 +215,9 @@ const OpeningManagerBidModal = ({
                         error: !!error,
                         helperText: error?.message || ' ',
                         fullWidth: true,
+                        inputProps: {
+                          'data-testid': 'datePickerInput',
+                        },
                       },
                     }}
                   />
