@@ -207,6 +207,32 @@ describe('OpeningManagerBidModal', () => {
       });
     });
 
+    it('конвертирует дату из DD.MM.YYYY в YYYY-MM-DD при сабмите', async () => {
+      const bid = makeBid({ id: 1, openning_date: '2024-01-15' });
+      mockBidStore.bid = bid;
+      mockUpdateBid.mockResolvedValue(true);
+
+      renderOpeningManagerBidModal();
+
+      const dateInput = screen.getByTestId(
+        'datePickerInput'
+      ) as HTMLInputElement;
+
+      fireEvent.change(dateInput, { target: { value: '20.02.2024' } });
+
+      fireEvent.click(screen.getByText('Сохранить'));
+
+      await waitFor(() => {
+        expect(mockUpdateBid).toHaveBeenCalledWith(
+          1,
+          expect.objectContaining({
+            openning_date: '2024-02-20',
+          }),
+          true
+        );
+      });
+    });
+
     it('не отправляет форму без bid', () => {
       mockBidStore.bid = null;
       renderOpeningManagerBidModal();
