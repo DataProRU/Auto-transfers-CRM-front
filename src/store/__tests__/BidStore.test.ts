@@ -127,7 +127,9 @@ describe('BidStore', () => {
     it('перемещает заявку из untouched в inProgress (field=true) и мержит данные', async () => {
       bidStore.setuntouchedBids([makeBid({ id: 1, brand: 'A' })]);
 
-      changeBidMock.mockResolvedValue({} as AxiosResponse<unknown>);
+      changeBidMock.mockResolvedValue({
+        data: { vehicle_transporter: 1 }
+      } as AxiosResponse<{ vehicle_transporter: number }>);
 
       const formData = { b: 2 } as unknown as
         | BidFormData
@@ -146,7 +148,9 @@ describe('BidStore', () => {
     it('обновляет inProgress по id если записи нет в untouched (field=true)', async () => {
       bidStore.setInProgressBids([makeBid({ id: 2, brand: 'B' })]);
 
-      changeBidMock.mockResolvedValue({} as AxiosResponse<unknown>);
+      changeBidMock.mockResolvedValue({
+        data: { vehicle_transporter: 1 }
+      } as AxiosResponse<{ vehicle_transporter: number }>);
 
       const formData = { b: 3 } as unknown as
         | BidFormData
@@ -164,7 +168,9 @@ describe('BidStore', () => {
     it('перемещает заявку из inProgress в untouched при field=false', async () => {
       bidStore.setInProgressBids([makeBid({ id: 3, brand: 'C' })]);
 
-      changeBidMock.mockResolvedValue({} as AxiosResponse<unknown>);
+      changeBidMock.mockResolvedValue({
+        data: { vehicle_transporter: 1 }
+      } as AxiosResponse<{ vehicle_transporter: number }>);
 
       const formData = { b: 2 } as unknown as
         | BidFormData
@@ -194,7 +200,7 @@ describe('BidStore', () => {
     });
   });
 
-  describe('updateTitleBid', () => {
+  describe('updateExpandedBid - Title', () => {
     it('при notified=true и took_title yes/consignment переносит в completed', async () => {
       bidStore.setuntouchedBids([makeBid({ id: 10, brand: 'X' })]);
       bidStore.setInProgressBids([makeBid({ id: 11, brand: 'Y' })]);
@@ -207,7 +213,7 @@ describe('BidStore', () => {
         x: 5,
       } as unknown as TitleBidFormData;
 
-      const ok = await bidStore.updateTitleBid(10, data);
+      const ok = await bidStore.updateExpandedBid(10, data, true, true);
       expect(ok).toBe(true);
 
       expect(bidStore.untouchedBids.find((b) => b.id === 10)).toBeUndefined();
@@ -228,7 +234,7 @@ describe('BidStore', () => {
         y: 9,
       } as unknown as TitleBidFormData;
 
-      const ok = await bidStore.updateTitleBid(12, data);
+      const ok = await bidStore.updateExpandedBid(12, data, true, false);
       expect(ok).toBe(true);
 
       expect(bidStore.untouchedBids.find((b) => b.id === 12)).toBeUndefined();
@@ -240,9 +246,14 @@ describe('BidStore', () => {
 
       changeBidMock.mockResolvedValue({} as AxiosResponse<unknown>);
 
-      const ok = await bidStore.updateTitleBid(13, {
-        notified_logistician_by_title: false,
-      } as unknown as TitleBidFormData);
+      const ok = await bidStore.updateExpandedBid(
+        13,
+        {
+          notified_logistician_by_title: false,
+        } as unknown as TitleBidFormData,
+        false,
+        false
+      );
       expect(ok).toBe(true);
 
       expect(bidStore.inProgressBids.find((b) => b.id === 13)).toBeUndefined();
@@ -253,16 +264,18 @@ describe('BidStore', () => {
       changeBidMock.mockRejectedValue(new Error('fail'));
       getAPIErrorMessageMock.mockReturnValue('Ошибка тайтла');
 
-      const ok = await bidStore.updateTitleBid(
+      const ok = await bidStore.updateExpandedBid(
         1,
-        {} as unknown as TitleBidFormData
+        {} as unknown as TitleBidFormData,
+        false,
+        false
       );
       expect(ok).toBe(false);
       expect(bidStore.bidError).toBe('Ошибка тайтла');
     });
   });
 
-  describe('updateReExportBid', () => {
+  describe('updateExpandedBid - ReExport', () => {
     it('prepared_documents=true и export=true — переносит в completed', async () => {
       bidStore.setuntouchedBids([makeBid({ id: 20, brand: 'R' })]);
       bidStore.setInProgressBids([makeBid({ id: 21, brand: 'S' })]);
@@ -274,7 +287,7 @@ describe('BidStore', () => {
         export: true,
         z: 7,
       } as unknown as ReExportBidFormData;
-      const ok = await bidStore.updateReExportBid(20, data);
+      const ok = await bidStore.updateExpandedBid(20, data, true, true);
 
       expect(ok).toBe(true);
       expect(bidStore.untouchedBids.find((b) => b.id === 20)).toBeUndefined();
@@ -291,7 +304,7 @@ describe('BidStore', () => {
         export: false,
         k: 3,
       } as unknown as ReExportBidFormData;
-      const ok = await bidStore.updateReExportBid(22, data);
+      const ok = await bidStore.updateExpandedBid(22, data, true, false);
 
       expect(ok).toBe(true);
       expect(bidStore.untouchedBids.find((b) => b.id === 22)).toBeUndefined();
@@ -302,9 +315,14 @@ describe('BidStore', () => {
       bidStore.setInProgressBids([makeBid({ id: 23, brand: 'U' })]);
       changeBidMock.mockResolvedValue({} as AxiosResponse<unknown>);
 
-      const ok = await bidStore.updateReExportBid(23, {
-        prepared_documents: false,
-      } as unknown as ReExportBidFormData);
+      const ok = await bidStore.updateExpandedBid(
+        23,
+        {
+          prepared_documents: false,
+        } as unknown as ReExportBidFormData,
+        false,
+        false
+      );
 
       expect(ok).toBe(true);
       expect(bidStore.inProgressBids.find((b) => b.id === 23)).toBeUndefined();
@@ -315,9 +333,11 @@ describe('BidStore', () => {
       changeBidMock.mockRejectedValue(new Error('fail'));
       getAPIErrorMessageMock.mockReturnValue('Ошибка реэкспорта');
 
-      const ok = await bidStore.updateReExportBid(
+      const ok = await bidStore.updateExpandedBid(
         1,
-        {} as unknown as ReExportBidFormData
+        {} as unknown as ReExportBidFormData,
+        false,
+        false
       );
       expect(ok).toBe(false);
       expect(bidStore.bidError).toBe('Ошибка реэкспорта');

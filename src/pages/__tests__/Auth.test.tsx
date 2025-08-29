@@ -38,6 +38,34 @@ jest.mock('@/store/AuthStore', () => ({
   },
 }));
 
+jest.mock('mui-tel-input', () => ({
+  MuiTelInput: ({
+    value = '',
+    onChange,
+    label,
+    error,
+    helperText,
+    fullWidth,
+    ...props
+  }: {
+    value?: string;
+    onChange?: (value: string) => void;
+    label?: string;
+    error?: boolean;
+    helperText?: string;
+    fullWidth?: boolean;
+    [key: string]: unknown;
+  }) => (
+    <input
+      value={value}
+      onChange={(e) => onChange?.(e.target.value)}
+      placeholder={label}
+      aria-label={label}
+      {...props}
+    />
+  ),
+}));
+
 const renderAuth = () =>
   render(
     <BrowserRouter>
@@ -53,7 +81,9 @@ describe('Auth Page', () => {
   it('рендерит форму авторизации', () => {
     renderAuth();
 
-    expect(screen.getByLabelText(/Логин\/Номер телефона/i)).toBeInTheDocument();
+    expect(
+      screen.getByLabelText(/Номер телефона \/ Логин/i)
+    ).toBeInTheDocument();
     expect(screen.getByLabelText(/Пароль/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Войти/i })).toBeInTheDocument();
   });
@@ -61,7 +91,7 @@ describe('Auth Page', () => {
   it('поля логин и пароль имеют required', () => {
     renderAuth();
 
-    const loginInput = screen.getByLabelText(/Логин/i);
+    const loginInput = screen.getByLabelText(/Номер телефона \/ Логин/i);
     const passwordInput = screen.getByLabelText(/Пароль/i);
 
     expect(loginInput).toBeRequired();
@@ -71,7 +101,10 @@ describe('Auth Page', () => {
   it('показывает ошибку при коротком пароле', async () => {
     renderAuth();
 
-    await userEvent.type(screen.getByLabelText(/Логин/i), 'testuser');
+    await userEvent.type(
+      screen.getByLabelText(/Номер телефона \/ Логин/i),
+      'testuser'
+    );
     await userEvent.type(screen.getByLabelText(/Пароль/i), '123');
     await userEvent.click(screen.getByRole('button', { name: /Войти/i }));
 
@@ -93,7 +126,7 @@ describe('Auth Page', () => {
     renderAuth();
 
     await userEvent.type(
-      screen.getByLabelText(/Логин\/Номер телефона/i),
+      screen.getByLabelText(/Номер телефона \/ Логин/i),
       'validuser'
     );
     await userEvent.type(screen.getByLabelText(/Пароль/i), 'validpassword123');
@@ -118,7 +151,7 @@ describe('Auth Page', () => {
 
     renderAuth();
 
-    fireEvent.change(screen.getByLabelText(/Логин\/Номер телефона/i), {
+    fireEvent.change(screen.getByLabelText(/Номер телефона \/ Логин/i), {
       target: { value: 'wronguser' },
     });
     fireEvent.change(screen.getByLabelText(/Пароль/i), {

@@ -1,7 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
-import LogistBidModal from '../LogistBidModal';
+import LogistBidModal from '../Logist/LogistBidModal.tsx';
 import bidStore from '@/store/BidStore';
 import type { Bid } from '@/models/BidResponse';
 import { makeBid } from '@/utils/test/factories.ts';
@@ -248,7 +248,7 @@ describe('LogistBidModal', () => {
             notified_parking: false,
             notified_inspector: false,
           },
-          't1'
+          true
         );
         expect(mockedShowNotification).toHaveBeenCalledWith(
           'Данные успешно изменены!',
