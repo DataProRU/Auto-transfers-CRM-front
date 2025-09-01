@@ -98,6 +98,84 @@ describe('Auth Page', () => {
     expect(passwordInput).toBeRequired();
   });
 
+  it('MuiTelInput корректно обрабатывает изменение значения', async () => {
+    renderAuth();
+
+    const phoneInput = screen.getByLabelText(/Номер телефона \/ Логин/i);
+
+    await userEvent.type(phoneInput, '+7 999 123-45-67');
+
+    expect(phoneInput).toHaveValue('+7 999 123-45-67');
+  });
+
+  it('MuiTelInput показывает ошибку валидации при пустом значении', async () => {
+    renderAuth();
+
+    const passwordInput = screen.getByLabelText(/Пароль/i);
+
+    // Оставляем поле телефона пустым
+    await userEvent.type(passwordInput, 'validpassword123');
+    await userEvent.click(screen.getByRole('button', { name: /Войти/i }));
+
+    expect(
+      await screen.findByText(/Логин обязятелен для заполенения/i)
+    ).toBeInTheDocument();
+  });
+
+  it('MuiTelInput корректно передает значение в форму', async () => {
+    const mockResponse = {
+      data: {
+        refresh: 'mockRefreshToken',
+        access: 'mockAccessToken',
+      },
+    } as AxiosResponse<AuthResponse>;
+
+    (authStore.login as jest.Mock).mockResolvedValue(mockResponse);
+
+    renderAuth();
+
+    const phoneInput = screen.getByLabelText(/Номер телефона \/ Логин/i);
+    const passwordInput = screen.getByLabelText(/Пароль/i);
+
+    await userEvent.type(phoneInput, '+7 999 123 45 67');
+    await userEvent.type(passwordInput, 'validpassword123');
+    await userEvent.click(screen.getByRole('button', { name: /Войти/i }));
+
+    await waitFor(() => {
+      expect(authStore.login).toHaveBeenCalledWith(
+        '+79991234567',
+        'validpassword123'
+      );
+    });
+  });
+
+  it('MuiTelInput очищает пробелы при отправке формы', async () => {
+    const mockResponse = {
+      data: {
+        refresh: 'mockRefreshToken',
+        access: 'mockAccessToken',
+      },
+    } as AxiosResponse<AuthResponse>;
+
+    (authStore.login as jest.Mock).mockResolvedValue(mockResponse);
+
+    renderAuth();
+
+    const phoneInput = screen.getByLabelText(/Номер телефона \/ Логин/i);
+    const passwordInput = screen.getByLabelText(/Пароль/i);
+
+    await userEvent.type(phoneInput, '+7 999 123 45 67');
+    await userEvent.type(passwordInput, 'validpassword123');
+    await userEvent.click(screen.getByRole('button', { name: /Войти/i }));
+
+    await waitFor(() => {
+      expect(authStore.login).toHaveBeenCalledWith(
+        '+79991234567',
+        'validpassword123'
+      );
+    });
+  });
+
   it('показывает ошибку при коротком пароле', async () => {
     renderAuth();
 

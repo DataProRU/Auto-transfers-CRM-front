@@ -128,7 +128,7 @@ describe('BidStore', () => {
       bidStore.setuntouchedBids([makeBid({ id: 1, brand: 'A' })]);
 
       changeBidMock.mockResolvedValue({
-        data: { vehicle_transporter: 1 }
+        data: { vehicle_transporter: 1 },
       } as AxiosResponse<{ vehicle_transporter: number }>);
 
       const formData = { b: 2 } as unknown as
@@ -149,7 +149,7 @@ describe('BidStore', () => {
       bidStore.setInProgressBids([makeBid({ id: 2, brand: 'B' })]);
 
       changeBidMock.mockResolvedValue({
-        data: { vehicle_transporter: 1 }
+        data: { vehicle_transporter: 1 },
       } as AxiosResponse<{ vehicle_transporter: number }>);
 
       const formData = { b: 3 } as unknown as
@@ -169,7 +169,7 @@ describe('BidStore', () => {
       bidStore.setInProgressBids([makeBid({ id: 3, brand: 'C' })]);
 
       changeBidMock.mockResolvedValue({
-        data: { vehicle_transporter: 1 }
+        data: { vehicle_transporter: 1 },
       } as AxiosResponse<{ vehicle_transporter: number }>);
 
       const formData = { b: 2 } as unknown as
