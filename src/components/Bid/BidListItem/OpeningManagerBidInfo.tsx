@@ -1,6 +1,6 @@
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
-import { getTransitMethod } from '../../../utils/getTransitMethod';
+import { getTransitMethod } from '../../../utils/getSelectFieldText';
 import moment from 'moment';
 import type { Bid } from '../../../models/BidResponse';
 

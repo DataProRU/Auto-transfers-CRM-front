@@ -5,12 +5,14 @@ interface BidCheckboxProps {
   checked: boolean;
   label: string;
   disabled?: boolean;
+  visible?: boolean;
   onChange?: (checked: boolean) => void;
 }
 
 const BidCheckbox: React.FC<BidCheckboxProps> = ({
   checked = false,
   label,
+  visible = true,
   disabled = false,
   onChange,
 }) => {
@@ -24,6 +26,9 @@ const BidCheckbox: React.FC<BidCheckboxProps> = ({
         />
       }
       label={label}
+      sx={{
+        display: visible ? 'block' : 'none',
+      }}
     />
   );
 };

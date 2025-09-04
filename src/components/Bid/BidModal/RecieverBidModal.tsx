@@ -55,7 +55,6 @@ const RecieverBidModal = ({ open, onClose }: RecieverModalProps) => {
         : null,
       receive_vehicle: bid?.receive_vehicle || false,
       receive_documents: bid?.receive_documents || false,
-      full_acceptance: bid?.full_acceptance || false,
       receiver_keys_number: bid?.receiver_keys_number || 0,
     },
   });
@@ -75,7 +74,6 @@ const RecieverBidModal = ({ open, onClose }: RecieverModalProps) => {
           : null,
         receive_vehicle: bid?.receive_vehicle || false,
         receive_documents: bid?.receive_documents || false,
-        full_acceptance: bid?.full_acceptance || false,
         receiver_keys_number: bid?.receiver_keys_number || 0,
       });
     }
@@ -89,11 +87,10 @@ const RecieverBidModal = ({ open, onClose }: RecieverModalProps) => {
           ? moment(data.vehicle_arrival_date, 'DD.MM.YYYY').format('YYYY-MM-DD')
           : null,
       };
-      const inProgressCondition =
-        convertedData.vehicle_arrival_date ===
-        moment().add(1, 'days').format('YYYY-MM-DD');
+      const inProgressCondition = !!data.vehicle_arrival_date;
 
-      const completedCondition = data.full_acceptance === true;
+      const completedCondition =
+        data.receive_documents === true && data.receive_vehicle == true;
       const isSuccess = await updateExpandedBid(
         bid.id,
         convertedData,
@@ -206,39 +203,6 @@ const RecieverBidModal = ({ open, onClose }: RecieverModalProps) => {
                   />
                 )}
               />
-              <Controller
-                name='receive_vehicle'
-                control={control}
-                render={({ field }) => (
-                  <BidCheckbox
-                    checked={field.value || false}
-                    label='Принял автомобиль'
-                    onChange={field.onChange}
-                  />
-                )}
-              />
-              <Controller
-                name='receive_documents'
-                control={control}
-                render={({ field }) => (
-                  <BidCheckbox
-                    checked={field.value || false}
-                    label='Принял документы'
-                    onChange={field.onChange}
-                  />
-                )}
-              />
-              <Controller
-                name='full_acceptance'
-                control={control}
-                render={({ field }) => (
-                  <BidCheckbox
-                    checked={field.value || false}
-                    label='Полное принятие'
-                    onChange={field.onChange}
-                  />
-                )}
-              />
               <FormControl fullWidth>
                 <InputLabel id='receiver_keys_number'>Принял ключей</InputLabel>
                 <Select
@@ -259,6 +223,54 @@ const RecieverBidModal = ({ open, onClose }: RecieverModalProps) => {
                   </Typography>
                 )}
               </FormControl>
+
+              <Controller
+                name='receive_vehicle'
+                control={control}
+                render={({ field }) => (
+                  <>
+                    <BidCheckbox
+                      checked={field.value || false}
+                      label='Принял автомобиль'
+                      onChange={field.onChange}
+                    />
+                    {errors.receive_vehicle && (
+                      <Typography color='error' variant='caption'>
+                        {errors.receive_vehicle.message}
+                      </Typography>
+                    )}
+                  </>
+                )}
+              />
+              <Controller
+                name='receive_documents'
+                control={control}
+                render={({ field }) => (
+                  <>
+                    <BidCheckbox
+                      checked={field.value || false}
+                      label='Принял документы'
+                      onChange={field.onChange}
+                    />
+                    {errors.receive_documents && (
+                      <Typography color='error' variant='caption'>
+                        {errors.receive_documents.message}
+                      </Typography>
+                    )}
+                  </>
+                )}
+              />
+
+              <BidCheckbox
+                checked={
+                  bid?.full_acceptance === true ||
+                  (bid?.receive_vehicle === true &&
+                    bid?.receive_documents === true) ||
+                  false
+                }
+                label='Полное принятие'
+                disabled={true}
+              />
             </Stack>
           </LocalizationProvider>
         </DialogContent>

@@ -12,99 +12,109 @@ import { useNotification } from '../providers/Notification';
 import bidStore from '../store/BidStore';
 import BidListItem from '../components/Bid/BidListItem/BidListItem';
 
-const DefaultRequests = observer(() => {
-  const { showNotification } = useNotification();
-  const { fetchBids, bidError, isBidLoading, untouchedBids, inProgressBids } =
-    bidStore;
+interface DefaultRequestsProps {
+  isTitle: boolean;
+}
 
-  useEffect(() => {
-    fetchBids();
-  }, [fetchBids]);
+const DefaultRequests = observer(
+  ({ isTitle = false }: DefaultRequestsProps) => {
+    const { showNotification } = useNotification();
+    const { fetchBids, bidError, isBidLoading, untouchedBids, inProgressBids } =
+      bidStore;
 
-  useEffect(() => {
-    if (bidError) {
-      showNotification(bidError, 'error');
-    }
-  }, [bidError, showNotification]);
-  return (
-    <Container sx={{ py: 5 }}>
-      <Typography component='h1' variant='h4' textAlign='center' mb={4}>
-        Заявки
-      </Typography>
-      {isBidLoading ? (
-        <Typography textAlign='center'>Загрузка данных...</Typography>
-      ) : (
-        <Grid container spacing={4}>
-          <Grid size={6}>
-            <Paper elevation={3}>
-              <Box
-                sx={{
-                  p: 2,
-                  bgcolor: 'primary.light',
-                  color: 'white',
-                }}
-              >
-                <Typography variant='h6'>
-                  Необработанные
-                  <Chip
-                    label={untouchedBids.length}
-                    color='secondary'
-                    sx={{ ml: 1 }}
-                  />
-                </Typography>
-              </Box>
-              <List>
-                {untouchedBids.length > 0 ? (
-                  untouchedBids.map((bid) => (
-                    <BidListItem key={bid.id} bid={bid} />
-                  ))
-                ) : (
-                  <ListItem>
-                    <Typography variant='body2' color='text.secondary'>
-                      Нет необработанных заявок
-                    </Typography>
-                  </ListItem>
-                )}
-              </List>
-            </Paper>
+    useEffect(() => {
+      fetchBids();
+    }, [fetchBids]);
+
+    useEffect(() => {
+      if (bidError) {
+        showNotification(bidError, 'error');
+      }
+    }, [bidError, showNotification]);
+    return (
+      <Container sx={{ py: 5 }}>
+        <Typography component='h1' variant='h4' textAlign='center' mb={4}>
+          Заявки
+        </Typography>
+        {isBidLoading ? (
+          <Typography textAlign='center'>Загрузка данных...</Typography>
+        ) : (
+          <Grid container spacing={4}>
+            <Grid size={6}>
+              <Paper elevation={3}>
+                <Box
+                  sx={{
+                    p: 2,
+                    bgcolor: 'primary.light',
+                    color: 'white',
+                  }}
+                >
+                  <Typography variant='h6'>
+                    {isTitle === false ? 'Необработанные' : 'В работе'}
+                    <Chip
+                      label={untouchedBids.length}
+                      color='secondary'
+                      sx={{ ml: 1 }}
+                    />
+                  </Typography>
+                </Box>
+                <List>
+                  {untouchedBids.length > 0 ? (
+                    untouchedBids.map((bid) => (
+                      <BidListItem key={bid.id} bid={bid} />
+                    ))
+                  ) : (
+                    <ListItem>
+                      <Typography variant='body2' color='text.secondary'>
+                        {isTitle === false
+                          ? 'Нет необработанных заявок'
+                          : 'Нет заявок в работе'}
+                      </Typography>
+                    </ListItem>
+                  )}
+                </List>
+              </Paper>
+            </Grid>
+            <Grid size={6}>
+              <Paper elevation={3}>
+                <Box
+                  sx={{
+                    p: 2,
+                    bgcolor: 'secondary.light',
+                    color: 'white',
+                  }}
+                >
+                  <Typography variant='h6'>
+                    {isTitle === false ? 'В работе' : 'Завершено'}
+                    <Chip
+                      label={inProgressBids.length}
+                      color='primary'
+                      sx={{ ml: 1 }}
+                    />
+                  </Typography>
+                </Box>
+                <List>
+                  {inProgressBids.length > 0 ? (
+                    inProgressBids.map((bid) => (
+                      <BidListItem key={bid.id} bid={bid} />
+                    ))
+                  ) : (
+                    <ListItem>
+                      <Typography variant='body2' color='text.secondary'>
+                        {isTitle === false
+                          ? 'Нет заявок в работе'
+                          : 'Нет завершенных заявок'}
+                      </Typography>
+                    </ListItem>
+                  )}
+                </List>
+              </Paper>
+            </Grid>
           </Grid>
-          <Grid size={6}>
-            <Paper elevation={3}>
-              <Box
-                sx={{
-                  p: 2,
-                  bgcolor: 'secondary.light',
-                  color: 'white',
-                }}
-              >
-                <Typography variant='h6'>
-                  В работе
-                  <Chip
-                    label={inProgressBids.length}
-                    color='primary'
-                    sx={{ ml: 1 }}
-                  />
-                </Typography>
-              </Box>
-              <List>
-                {inProgressBids.length > 0 ? (
-                  inProgressBids.map((bid) => (
-                    <BidListItem key={bid.id} bid={bid} />
-                  ))
-                ) : (
-                  <ListItem>
-                    <Typography variant='body2' color='text.secondary'>
-                      Нет заявок в работе
-                    </Typography>
-                  </ListItem>
-                )}
-              </List>
-            </Paper>
-          </Grid>
-        </Grid>
-      )}
-    </Container>
-  );
-});
+        )}
+      </Container>
+    );
+  }
+);
 
 export default DefaultRequests;
