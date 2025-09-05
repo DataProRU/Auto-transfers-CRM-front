@@ -1,4 +1,4 @@
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
@@ -29,18 +29,15 @@ const Auth = () => {
   const {
     register,
     handleSubmit,
-    watch,
-    setValue,
+    control,
     formState: { errors },
   } = useForm<AuthFormData>({
     resolver: zodResolver(authSchema),
+    defaultValues: {
+      login: '',
+      password: '',
+    },
   });
-
-  const phoneValue = watch('login');
-
-  const handlePhoneChange = (newPhone: string) => {
-    setValue('login', newPhone, { shouldValidate: true });
-  };
 
   const onSubmit = async (data: AuthFormData) => {
     try {
@@ -84,23 +81,35 @@ const Auth = () => {
 
           <Box component='form' onSubmit={handleSubmit(onSubmit)}>
             <Stack spacing={2}>
-              <MuiTelInput
-                label='Номер телефона / Логин'
-                variant='outlined'
-                fullWidth
-                required
-                autoFocus
-                value={phoneValue || ''}
-                onChange={handlePhoneChange}
-                error={!!errors.login}
-                helperText={errors.login?.message}
-                defaultCountry='RU'
-                langOfCountryName='ru'
-                sx={{
-                  '& .MuiTelInput-Flag': {
-                    borderRadius: '4px',
+              <Controller
+                name='login'
+                control={control}
+                rules={{
+                  validate: (value) => {
+                    if (!value || value.trim() === '') {
+                      return 'Логин обязателен для заполнения';
+                    }
+                    return true;
                   },
                 }}
+                render={({ field, fieldState }) => (
+                  <MuiTelInput
+                    {...field}
+                    label='Номер телефона / Логин'
+                    variant='outlined'
+                    fullWidth
+                    autoFocus
+                    defaultCountry='RU'
+                    langOfCountryName='ru'
+                    error={!!fieldState.error}
+                    helperText={fieldState.error?.message}
+                    sx={{
+                      '& .MuiTelInput-Flag': {
+                        borderRadius: '4px',
+                      },
+                    }}
+                  />
+                )}
               />
               <TextField
                 label='Пароль'

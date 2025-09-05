@@ -1,12 +1,41 @@
 import z from 'zod';
 
-export const bidFormSchema = z.object({
-  transit_method: z.string().nonempty('Метод транзита обязателен'),
-  location: z.string().optional(),
-  requested_title: z.boolean().optional(),
-  notified_parking: z.boolean().optional(),
-  notified_inspector: z.boolean().optional(),
-});
+export const bidFormSchema = z
+  .object({
+    transit_method: z.string().nonempty('Метод транзита обязателен'),
+    acceptance_type: z.string().optional(),
+    location: z.string().optional(),
+    requested_title: z.boolean().optional(),
+    notified_parking: z.boolean().optional(),
+    notified_inspector: z.boolean().optional(),
+  })
+  .refine(
+    (data) => {
+      if (data.transit_method === 'without_openning') {
+        return data.acceptance_type && data.acceptance_type.trim() !== '';
+      }
+      return true;
+    },
+    {
+      message: 'Тип принятия обязателен при выборе "Без открытия"',
+      path: ['acceptance_type'],
+    }
+  )
+  .refine(
+    (data) => {
+      if (
+        data.transit_method === 'without_openning' &&
+        data.acceptance_type === 'with_re_export'
+      ) {
+        return data.requested_title === true;
+      }
+      return true;
+    },
+    {
+      message: 'Запрос тайтла обязателен при выборе "Без реэкспорта"',
+      path: ['requested_title'],
+    }
+  );
 
 export const logistbidLoadingFormSchema = z.object({
   vehicle_transporter: z.number({
@@ -24,42 +53,45 @@ export const rejectBidFormSchema = z.object({
     .min(1, 'Необходимо заполнить причину отказа в заявке'),
 });
 
-export const OpeningManagerBidFormSchema = z.object({
-  openning_date: z
-    .union([z.string(), z.null()])
-    .optional()
-    .superRefine((val, ctx) => {
-      if (val === null || val === undefined || val === '') return true;
+export const OpeningManagerBidFormSchema = z
+  .object({
+    openning_date: z
+      .string()
+      .nonempty('Дата открытия обязательна для заполнения')
+      .superRefine((val, ctx) => {
+        if (val) {
+          if (!/^\d{2}\.\d{2}\.\d{4}$/.test(val)) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: 'Дата должна быть в формате ДД.ММ.ГГГГ',
+            });
+            return false;
+          }
 
-      if (!/^\d{2}\.\d{2}\.\d{4}$/.test(val)) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: 'Дата должна быть в формате ДД.ММ.ГГГГ',
-        });
-        return false;
-      }
+          const [day, month, year] = val.split('.');
+          const date = new Date(`${year}-${month}-${day}`);
+          if (isNaN(date.getTime())) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: 'Некорректная дата',
+            });
+            return false;
+          }
+        }
 
-      const [day, month, year] = val.split('.');
-      const date = new Date(`${year}-${month}-${day}`);
-      if (isNaN(date.getTime())) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: 'Некорректная дата',
-        });
-        return false;
-      }
-
-      return true;
-    })
-    .transform((val) => (val === '' ? null : val)),
-  opened: z.boolean().optional(),
-  manager_comment: z.string().optional(),
-});
+        return true;
+      }),
+    opened: z.boolean(),
+    manager_comment: z.string().optional(),
+  })
+  .refine((data) => data.opened == true, {
+    message: 'Необходимо подтвердить открытие',
+    path: ['opened'],
+  });
 
 export const TitleBidFormSchema = z.object({
   pickup_address: z.string().optional(),
   took_title: z.string(),
-  notified_logistician_by_title: z.boolean().optional(),
 });
 
 export const InspectorBidFormSchema = z.object({

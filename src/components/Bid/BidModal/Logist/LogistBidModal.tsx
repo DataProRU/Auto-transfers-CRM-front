@@ -41,17 +41,27 @@ const LogistBidModal = ({ open, onClose }: LogistBidModalProps) => {
     handleSubmit,
     formState: { errors },
     control,
+    resetField,
     reset,
   } = useForm<BidFormData>({
     resolver: zodResolver(bidFormSchema),
     defaultValues: {
       transit_method: bid?.transit_method || '',
+      acceptance_type: bid?.acceptance_type || '',
       location: bid?.location || '',
       requested_title: bid?.requested_title || false,
       notified_parking: bid?.notified_parking || false,
       notified_inspector: bid?.notified_inspector || false,
     },
   });
+
+  const transitMethod = useWatch({
+    control,
+    name: 'transit_method',
+  });
+
+  const isReExport = transitMethod === 're_export';
+  const isWithoutOpening = transitMethod === 'without_openning';
 
   useEffect(() => {
     if (bidError) {
@@ -61,9 +71,20 @@ const LogistBidModal = ({ open, onClose }: LogistBidModalProps) => {
   }, [bidError, showNotification, setBidError]);
 
   useEffect(() => {
+    if (!isReExport) {
+      resetField('notified_parking', { defaultValue: false });
+      resetField('notified_inspector', { defaultValue: false });
+    }
+    if (!isWithoutOpening) {
+      resetField('acceptance_type', { defaultValue: '' });
+    }
+  }, [isReExport, isWithoutOpening, resetField]);
+
+  useEffect(() => {
     if (bid) {
       reset({
         transit_method: bid.transit_method || '',
+        acceptance_type: bid.acceptance_type || '',
         location: bid.location || '',
         requested_title: bid.requested_title || false,
         notified_parking: bid.notified_parking || false,
@@ -71,13 +92,6 @@ const LogistBidModal = ({ open, onClose }: LogistBidModalProps) => {
       });
     }
   }, [bid, reset]);
-
-  const transitMethod = useWatch({
-    control,
-    name: 'transit_method',
-  });
-
-  const isReExport = transitMethod === 're_export';
 
   const onSubmit = async (data: BidFormData) => {
     if (bid) {
@@ -209,7 +223,7 @@ const LogistBidModal = ({ open, onClose }: LogistBidModalProps) => {
                   />
                   <BidCheckbox
                     checked={bid?.approved_by_re_export || false}
-                    label='Экспорт'
+                    label='Реэкспорт'
                     disabled
                   />
                 </Stack>
@@ -242,6 +256,38 @@ const LogistBidModal = ({ open, onClose }: LogistBidModalProps) => {
                 </FormControl>
               )}
             />
+            <Controller
+              name='acceptance_type'
+              control={control}
+              render={({ field }) => (
+                <FormControl
+                  fullWidth
+                  sx={{
+                    display: isWithoutOpening ? 'flex' : 'none',
+                  }}
+                >
+                  <InputLabel id='acceptance_type'>Тип принятия</InputLabel>
+                  <Select
+                    labelId='acceptance_type'
+                    id='acceptance_type'
+                    label='Тип принятия'
+                    value={field.value || ''}
+                    onChange={field.onChange}
+                  >
+                    <MenuItem value={''}>Не выбрано</MenuItem>
+                    <MenuItem value={'with_re_export'}>С реэспортом</MenuItem>
+                    <MenuItem value={'without_re_export'}>
+                      Без реэспорта
+                    </MenuItem>
+                  </Select>
+                  {errors.acceptance_type && (
+                    <Typography color='error' variant='caption'>
+                      {errors.acceptance_type.message}
+                    </Typography>
+                  )}
+                </FormControl>
+              )}
+            />
             <TextField
               label='Местонахождение'
               id='location'
@@ -255,11 +301,18 @@ const LogistBidModal = ({ open, onClose }: LogistBidModalProps) => {
               name='requested_title'
               control={control}
               render={({ field }) => (
-                <BidCheckbox
-                  checked={field.value || false}
-                  label='Запросил тайтл'
-                  onChange={field.onChange}
-                />
+                <>
+                  <BidCheckbox
+                    checked={field.value || false}
+                    label='Запросил тайтл'
+                    onChange={field.onChange}
+                  />
+                  {errors.requested_title && (
+                    <Typography color='error' variant='caption'>
+                      {errors.requested_title.message}
+                    </Typography>
+                  )}
+                </>
               )}
             />
 
@@ -271,7 +324,7 @@ const LogistBidModal = ({ open, onClose }: LogistBidModalProps) => {
                   checked={field.value || false}
                   label='Уведомил стоянку (Без открытия)'
                   onChange={field.onChange}
-                  disabled={!isReExport}
+                  visible={isReExport}
                 />
               )}
             />
@@ -284,7 +337,7 @@ const LogistBidModal = ({ open, onClose }: LogistBidModalProps) => {
                   checked={field.value || false}
                   label='Уведомил осмотр (Без открытия)'
                   onChange={field.onChange}
-                  disabled={!isReExport}
+                  visible={isReExport}
                 />
               )}
             />

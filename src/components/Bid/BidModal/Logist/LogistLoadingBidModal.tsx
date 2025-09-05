@@ -23,7 +23,10 @@ import type { LogistBidLoadingFormData } from '../../../../@types/bid';
 import { logistbidLoadingFormSchema } from '../../../../schemas/bid';
 import bidStore from '../../../../store/BidStore';
 import BidCheckbox from '../../BidCheckBox';
-import { getTransitMethod } from '../../../../utils/getTransitMethod';
+import {
+  getAcceptanceType,
+  getTransitMethod,
+} from '../../../../utils/getSelectFieldText';
 import FormControl from '@mui/material/FormControl';
 import InputLabel from '@mui/material/InputLabel';
 import Select from '@mui/material/Select';
@@ -185,7 +188,9 @@ const LogistLoadingBidModal = observer(
                         variant='outlined'
                         disabled
                         value={
-                          moment(bid?.openning_date).format('DD.MM.YYYY') || ''
+                          bid?.openning_date
+                            ? moment(bid?.openning_date).format('DD.MM.YYYY')
+                            : ''
                         }
                       />
                       <TextField
@@ -210,6 +215,15 @@ const LogistLoadingBidModal = observer(
                         disabled
                         value={getTransitMethod(bid?.transit_method || '')}
                       />
+                      {bid?.transit_method === 'without_openning' && (
+                        <TextField
+                          label='Тип принятия'
+                          id='acceptance_type'
+                          variant='outlined'
+                          disabled
+                          value={getAcceptanceType(bid?.acceptance_type || '')}
+                        />
+                      )}
                       <TextField
                         label='Местонахождение'
                         id='location'

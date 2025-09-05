@@ -84,6 +84,7 @@ class BidStore {
     data:
       | BidFormData
       | OpeningManagerBidFormData
+      | TitleBidFormData
       | InspectorBidFormData
       | LogistBidLoadingFormData,
     inProgressCondition: boolean,
@@ -141,7 +142,7 @@ class BidStore {
   updateExpandedBid = action(
     async (
       id: number,
-      data: TitleBidFormData | ReExportBidFormData | RecieverBidFormData,
+      data: ReExportBidFormData | RecieverBidFormData,
       inProgressCondition: boolean,
       completedCondition: boolean,
       status: string | null = null

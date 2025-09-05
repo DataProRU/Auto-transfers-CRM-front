@@ -12,13 +12,12 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Typography from '@mui/material/Typography';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import TextField from '@mui/material/TextField';
-import { Controller, useForm } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import type { TitleBidFormData } from '../../../@types/bid';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { TitleBidFormSchema } from '../../../schemas/bid';
 import DialogActions from '@mui/material/DialogActions';
 import Button from '@mui/material/Button';
-import BidCheckbox from '../BidCheckBox';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment';
 import { ruRU } from '@mui/x-date-pickers/locales';
@@ -34,22 +33,19 @@ interface TitleModalProps {
 }
 
 const TitleBidModal = ({ open, onClose }: TitleModalProps) => {
-  const { bid, updateExpandedBid, bidError, setBidError } = bidStore;
+  const { bid, updateBid, bidError, setBidError } = bidStore;
   const { showNotification } = useNotification();
 
   const {
     register,
     handleSubmit,
     formState: { errors },
-    control,
     reset,
   } = useForm<TitleBidFormData>({
     resolver: zodResolver(TitleBidFormSchema),
     defaultValues: {
       pickup_address: bid?.pickup_address || '',
       took_title: bid?.took_title || '',
-      notified_logistician_by_title:
-        bid?.notified_logistician_by_title || false,
     },
   });
 
@@ -65,8 +61,6 @@ const TitleBidModal = ({ open, onClose }: TitleModalProps) => {
       reset({
         pickup_address: bid?.pickup_address || '',
         took_title: bid?.took_title || '',
-        notified_logistician_by_title:
-          bid?.notified_logistician_by_title || false,
       });
     }
   }, [bid, reset]);
@@ -80,15 +74,9 @@ const TitleBidModal = ({ open, onClose }: TitleModalProps) => {
             ? moment().format('YYYY-MM-DD')
             : null,
       };
-      const inProgressCondition = data.notified_logistician_by_title === true;
       const completedCondition =
         data.took_title === 'yes' || data.took_title === 'consignment';
-      const isSuccess = await updateExpandedBid(
-        bid.id,
-        payload,
-        inProgressCondition,
-        completedCondition
-      );
+      const isSuccess = await updateBid(bid.id, payload, completedCondition);
       if (isSuccess) {
         showNotification('Данные успешно изменены!', 'success');
         onClose();
@@ -210,17 +198,6 @@ const TitleBidModal = ({ open, onClose }: TitleModalProps) => {
                     ? moment(bid?.title_collection_date).format('DD.MM.YYYY')
                     : 'Не указана'
                 }
-              />
-              <Controller
-                name='notified_logistician_by_title'
-                control={control}
-                render={({ field }) => (
-                  <BidCheckbox
-                    checked={field.value || false}
-                    label='Уведомил логиста'
-                    onChange={field.onChange}
-                  />
-                )}
               />
             </Stack>
           </LocalizationProvider>

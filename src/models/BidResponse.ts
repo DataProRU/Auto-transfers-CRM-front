@@ -19,6 +19,7 @@ export interface Bid {
   transporter: string;
   recipient: string;
   transit_method: string | null;
+  acceptance_type: string | null;
   location: string | null;
   requested_title: boolean;
   notified_parking: boolean;
@@ -32,7 +33,6 @@ export interface Bid {
   pickup_address: string | null;
   title_collection_date: string | null;
   took_title: string | null;
-  notified_logistician_by_title: boolean;
   notified_logistician_by_inspector: boolean;
   acceptance_date: string | null;
   transit_number: string | null;
