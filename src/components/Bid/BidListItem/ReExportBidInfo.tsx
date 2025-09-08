@@ -1,7 +1,7 @@
 import Box from '@mui/material/Box';
 import type { Bid } from '../../../models/BidResponse';
 import Typography from '@mui/material/Typography';
-import { getTransitMethod } from '../../../utils/getTransitMethod';
+import { getTransitMethod } from '../../../utils/getSelectFieldText';
 
 interface ReExportBidInfoProps {
   bid: Bid;

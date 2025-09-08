@@ -19,7 +19,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { OpeningManagerBidFormSchema } from '../../../schemas/bid';
 import DialogActions from '@mui/material/DialogActions';
 import Button from '@mui/material/Button';
-import { getTransitMethod } from '../../../utils/getTransitMethod';
+import { getTransitMethod } from '../../../utils/getSelectFieldText';
 import BidCheckbox from '../BidCheckBox';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment';
@@ -51,7 +51,7 @@ const OpeningManagerBidModal = ({
     defaultValues: {
       openning_date: bid?.openning_date
         ? moment(bid.openning_date).format('DD.MM.YYYY')
-        : null,
+        : '',
       manager_comment: bid?.manager_comment || '',
       opened: bid?.opened || false,
     },
@@ -69,7 +69,7 @@ const OpeningManagerBidModal = ({
       reset({
         openning_date: bid?.openning_date
           ? moment(bid.openning_date).format('DD.MM.YYYY')
-          : null,
+          : '',
         manager_comment: bid?.manager_comment || '',
         opened: bid?.opened || false,
       });
@@ -82,9 +82,15 @@ const OpeningManagerBidModal = ({
         ...data,
         openning_date: data.openning_date
           ? moment(data.openning_date, 'DD.MM.YYYY').format('YYYY-MM-DD')
-          : null,
+          : '',
       };
-      const isSuccess = await updateBid(bid.id, convertedData, true);
+      const inProgressCondition =
+        data.openning_date !== '' && data.opened === true;
+      const isSuccess = await updateBid(
+        bid.id,
+        convertedData,
+        inProgressCondition
+      );
       if (isSuccess) {
         showNotification('Данные успешно изменены!', 'success');
         onClose();
@@ -236,11 +242,18 @@ const OpeningManagerBidModal = ({
                 name='opened'
                 control={control}
                 render={({ field }) => (
-                  <BidCheckbox
-                    checked={field.value || false}
-                    label='Открыто'
-                    onChange={field.onChange}
-                  />
+                  <>
+                    <BidCheckbox
+                      checked={field.value || false}
+                      label='Открыто'
+                      onChange={field.onChange}
+                    />
+                    {errors.opened && (
+                      <Typography color='error' variant='caption'>
+                        {errors.opened.message}
+                      </Typography>
+                    )}
+                  </>
                 )}
               />
             </Stack>

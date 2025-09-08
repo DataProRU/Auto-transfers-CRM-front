@@ -29,7 +29,12 @@ const App = observer(() => {
     return <CircularProgress />;
   }
 
-  const DefaultRequestsRoles = ['logistician', 'opening_manager', 'inspector'];
+  const DefaultRequestsRoles = [
+    'logistician',
+    'opening_manager',
+    'title',
+    'inspector',
+  ];
 
   return (
     <>
@@ -52,7 +57,9 @@ const App = observer(() => {
                 >
                   <Header />
                   {DefaultRequestsRoles.includes(role!) ? (
-                    <DefaultRequests />
+                    <DefaultRequests
+                      isTitle={role === 'title' ? true : false}
+                    />
                   ) : (
                     <ExpandedRequests />
                   )}
