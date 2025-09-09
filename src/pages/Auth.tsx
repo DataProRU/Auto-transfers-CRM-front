@@ -97,6 +97,7 @@ const Auth = () => {
                     {...field}
                     label='Номер телефона / Логин'
                     variant='outlined'
+                    required
                     fullWidth
                     autoFocus
                     defaultCountry='RU'

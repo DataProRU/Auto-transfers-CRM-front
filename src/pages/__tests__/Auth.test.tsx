@@ -121,7 +121,7 @@ describe('Auth Page', () => {
   //   await userEvent.click(screen.getByRole('button', { name: /Войти/i }));
   //
   //   expect(
-  //     await screen.findByText(/Логин обязятелен для заполенения/i)
+  //     await screen.findByText(/Логин обязателен для заполнения/i)
   //   ).toBeInTheDocument();
   // });
 

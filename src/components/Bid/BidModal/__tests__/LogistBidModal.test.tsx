@@ -110,6 +110,7 @@ describe('LogistBidModal', () => {
       renderLogistBidModal();
 
       expect(screen.getByLabelText('Метод транзита')).toBeInTheDocument();
+      expect(screen.getByLabelText('Тип принятия')).toBeInTheDocument();
       expect(screen.getByLabelText('Местонахождение')).toBeInTheDocument();
       expect(screen.getByLabelText('Запросил тайтл')).toBeInTheDocument();
       expect(
@@ -164,6 +165,19 @@ describe('LogistBidModal', () => {
         screen.queryByText(/Метод транзита обязателен/)
       ).not.toBeInTheDocument();
     });
+
+    it('показывает ошибку валидации для чекбокса Запросить Тайтл когда тип принятия С реэкспортом', async () => {
+      mockBidStore.bid = makeBid();
+      renderLogistBidModal();
+
+      await userEvent.click(screen.getByRole('button', { name: 'Сохранить' }));
+
+      await waitFor(() => {
+        expect(
+          screen.getByText(/Метод транзита обязателен/)
+        ).toBeInTheDocument();
+      });
+    });
   });
 
   describe('Взаимодействие с формой', () => {
@@ -189,16 +203,18 @@ describe('LogistBidModal', () => {
       expect(inspectorCheckbox.checked).toBe(false);
     });
 
-    it('блокирует чекбоксы уведомлений когда не выбран re_export', () => {
+    it('блокирует чекбоксы уведомлений когда выбран не re_export', () => {
       mockBidStore.bid = makeBid({ transit_method: 't1' });
       renderLogistBidModal();
 
-      const { titleCheckbox, parkingCheckbox, inspectorCheckbox } =
-        getCheckboxes();
+      expect(screen.getByLabelText('Запросил тайтл')).toBeInTheDocument();
+      expect(
+        screen.getByLabelText('Уведомил стоянку (Без открытия)')
+      ).not.toBeVisible();
 
-      expect(titleCheckbox.disabled).toBe(false);
-      expect(parkingCheckbox.disabled).toBe(true);
-      expect(inspectorCheckbox.disabled).toBe(true);
+      expect(
+        screen.getByLabelText('Уведомил осмотр (Без открытия)')
+      ).not.toBeVisible();
     });
 
     it('разблокирует чекбоксы уведомлений когда выбран re_export', async () => {
@@ -207,14 +223,20 @@ describe('LogistBidModal', () => {
 
       const transitMethodSelect = screen.getByLabelText('Метод транзита');
       await userEvent.click(transitMethodSelect);
-      await userEvent.click(screen.getByText('Реэкспорт'));
 
-      const { titleCheckbox, parkingCheckbox, inspectorCheckbox } =
-        getCheckboxes();
+      const optionReExport = await screen.findByRole('option', {
+        name: 'Реэкспорт',
+      });
+      await userEvent.click(optionReExport);
 
-      expect(titleCheckbox.disabled).toBe(false);
-      expect(parkingCheckbox.disabled).toBe(false);
-      expect(inspectorCheckbox.disabled).toBe(false);
+      expect(screen.getByLabelText('Запросил тайтл')).toBeInTheDocument();
+
+      expect(
+        screen.queryByLabelText('Уведомил стоянку (Без открытия)')
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByLabelText('Уведомил осмотр (Без открытия)')
+      ).toBeInTheDocument();
     });
   });
 
@@ -235,7 +257,6 @@ describe('LogistBidModal', () => {
         'Test Location'
       );
 
-      // Отправляем форму
       await userEvent.click(screen.getByRole('button', { name: 'Сохранить' }));
 
       await waitFor(() => {
@@ -244,6 +265,7 @@ describe('LogistBidModal', () => {
           {
             transit_method: 't1',
             location: 'Test Location',
+            acceptance_type: '',
             requested_title: false,
             notified_parking: false,
             notified_inspector: false,
@@ -265,12 +287,10 @@ describe('LogistBidModal', () => {
 
       renderLogistBidModal();
 
-      // Заполняем форму
       const transitMethodSelect = screen.getByLabelText('Метод транзита');
       await userEvent.click(transitMethodSelect);
       await userEvent.click(screen.getByText('Т1'));
 
-      // Отправляем форму
       await userEvent.click(screen.getByRole('button', { name: 'Сохранить' }));
 
       await waitFor(() => {
@@ -285,9 +305,23 @@ describe('LogistBidModal', () => {
       mockBidStore.bid = null;
       renderLogistBidModal();
 
+      const transitMethodSelect = screen.getByLabelText('Метод транзита');
+      await userEvent.click(transitMethodSelect);
+      await userEvent.click(screen.getByText('Без открытия'));
+
+      const acceptanceTypeSelect = screen.getByLabelText('Тип принятия');
+      await userEvent.click(acceptanceTypeSelect);
+      await userEvent.click(screen.getByText('С реэспортом'));
+
       await userEvent.click(screen.getByRole('button', { name: 'Сохранить' }));
 
-      expect(updateBidMock).not.toHaveBeenCalled();
+      await waitFor(() => {
+        expect(
+          screen.getByText(
+            /Запрос тайтла обязателен при выборе "C реэкспортом"/
+          )
+        ).toBeInTheDocument();
+      });
     });
   });
 
@@ -368,6 +402,127 @@ describe('LogistBidModal', () => {
       await waitFor(() => {
         expect(mockOnClose).toHaveBeenCalled();
       });
+    });
+  });
+
+  describe('Поле acceptance_type', () => {
+    it('скрыто когда transit_method не равен "without_openning"', () => {
+      mockBidStore.bid = makeBid({ transit_method: 't1' });
+      renderLogistBidModal();
+
+      const acceptanceTypeSelect = screen.queryByLabelText('Тип принятия');
+      expect(acceptanceTypeSelect).not.toBeVisible();
+    });
+
+    it('отображается когда transit_method равен "without_openning"', async () => {
+      mockBidStore.bid = makeBid();
+      renderLogistBidModal();
+
+      const transitMethodSelect = screen.getByLabelText('Метод транзита');
+      await userEvent.click(transitMethodSelect);
+      await userEvent.click(screen.getByText('Без открытия'));
+
+      const acceptanceTypeSelect = screen.getByLabelText('Тип принятия');
+      expect(acceptanceTypeSelect).toBeVisible();
+    });
+
+    it('показывает ошибку валидации когда выбран "Без открытия" но не выбран тип принятия', async () => {
+      mockBidStore.bid = makeBid();
+      renderLogistBidModal();
+
+      const transitMethodSelect = screen.getByLabelText('Метод транзита');
+      await userEvent.click(transitMethodSelect);
+      await userEvent.click(screen.getByText('Без открытия'));
+
+      await userEvent.click(screen.getByRole('button', { name: 'Сохранить' }));
+
+      await waitFor(() => {
+        expect(
+          screen.getByText(/Тип принятия обязателен при выборе "Без открытия"/)
+        ).toBeInTheDocument();
+      });
+    });
+
+    it('не показывает ошибку валидации когда выбран тип принятия', async () => {
+      mockBidStore.bid = makeBid();
+      renderLogistBidModal();
+
+      const transitMethodSelect = screen.getByLabelText('Метод транзита');
+      await userEvent.click(transitMethodSelect);
+      await userEvent.click(screen.getByText('Без открытия'));
+
+      const acceptanceTypeSelect = screen.getByLabelText('Тип принятия');
+      await userEvent.click(acceptanceTypeSelect);
+      await userEvent.click(screen.getByText('Без реэспорта'));
+
+      await userEvent.click(screen.getByRole('button', { name: 'Сохранить' }));
+
+      expect(
+        screen.queryByText(/Тип принятия обязателен при выборе "Без открытия"/)
+      ).not.toBeInTheDocument();
+    });
+
+    it('заполняет форму данными из bid при открытии', () => {
+      const bid = makeBid({
+        transit_method: 'without_openning',
+        acceptance_type: 'with_re_export',
+      });
+      mockBidStore.bid = bid;
+      renderLogistBidModal();
+
+      expect(screen.getByText('С реэспортом')).toBeInTheDocument();
+    });
+
+    it('успешно отправляет форму с выбранным типом принятия', async () => {
+      const bid = makeBid();
+      mockBidStore.bid = bid;
+      updateBidMock.mockResolvedValue(true);
+
+      renderLogistBidModal();
+
+      const transitMethodSelect = screen.getByLabelText('Метод транзита');
+      await userEvent.click(transitMethodSelect);
+      await userEvent.click(screen.getByText('Без открытия'));
+
+      const acceptanceTypeSelect = screen.getByLabelText('Тип принятия');
+      await userEvent.click(acceptanceTypeSelect);
+      await userEvent.click(screen.getByText('Без реэспорта'));
+
+      await userEvent.click(screen.getByRole('button', { name: 'Сохранить' }));
+
+      await waitFor(() => {
+        expect(updateBidMock).toHaveBeenCalledWith(
+          bid.id,
+          {
+            transit_method: 'without_openning',
+            acceptance_type: 'without_re_export',
+            location: '',
+            requested_title: false,
+            notified_parking: false,
+            notified_inspector: false,
+          },
+          true
+        );
+      });
+    });
+
+    it('очищает acceptance_type когда изменяется transit_method с "without_openning" на другой', async () => {
+      const bid = makeBid({
+        transit_method: 'without_openning',
+        acceptance_type: 'with_re_export',
+      });
+      mockBidStore.bid = bid;
+      renderLogistBidModal();
+
+      expect(screen.getByLabelText('Тип принятия')).toBeVisible();
+      expect(screen.getByText('С реэспортом')).toBeInTheDocument();
+
+      const transitMethodSelect = screen.getByLabelText('Метод транзита');
+      await userEvent.click(transitMethodSelect);
+      await userEvent.click(screen.getByText('Т1'));
+
+      const acceptanceTypeSelect = screen.queryByLabelText('Тип принятия');
+      expect(acceptanceTypeSelect).not.toBeVisible();
     });
   });
 });
