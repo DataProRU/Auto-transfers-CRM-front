@@ -75,6 +75,12 @@ describe('OpeningManagerBidModal', () => {
       expect(screen.getByText('Отмена')).toBeInTheDocument();
       expect(screen.getByText('Сохранить')).toBeInTheDocument();
     });
+
+    it('отображает чекбокс Открыто', () => {
+      renderOpeningManagerBidModal();
+      const openedCheckbox = screen.getByLabelText('Открыто');
+      expect(openedCheckbox).toBeInTheDocument();
+    });
   });
 
   describe('Информация о заявке', () => {
@@ -121,18 +127,10 @@ describe('OpeningManagerBidModal', () => {
   });
 
   describe('Форма редактирования', () => {
-    it('отображает поле для даты открытия контейнера', () => {
+    it('отображает поля коментария, даты и чекбокса Открыто', () => {
       renderOpeningManagerBidModal();
       expect(screen.getByTestId('datePickerInput')).toBeInTheDocument();
-    });
-
-    it('отображает поле для комментария', () => {
-      renderOpeningManagerBidModal();
       expect(screen.getByLabelText('Комментарий')).toBeInTheDocument();
-    });
-
-    it('отображает чекбокс "Открыто"', () => {
-      renderOpeningManagerBidModal();
       expect(screen.getByLabelText('Открыто')).toBeInTheDocument();
     });
 
@@ -148,6 +146,10 @@ describe('OpeningManagerBidModal', () => {
       expect(
         screen.getByDisplayValue('Тестовый комментарий')
       ).toBeInTheDocument();
+      const dateInput = screen.getByTestId(
+        'datePickerInput'
+      ) as HTMLInputElement;
+      expect(dateInput).toHaveValue('15.01.2024');
       expect(screen.getByLabelText('Открыто')).toBeChecked();
     });
   });
@@ -161,6 +163,16 @@ describe('OpeningManagerBidModal', () => {
 
       renderOpeningManagerBidModal({ onClose });
 
+      const dateInput = screen.getByTestId(
+        'datePickerInput'
+      ) as HTMLInputElement;
+      fireEvent.change(dateInput, { target: { value: '20.02.2024' } });
+
+      const openedCheckbox = screen.getByLabelText(
+        'Открыто'
+      ) as HTMLInputElement;
+      fireEvent.click(openedCheckbox);
+
       const commentInput = screen.getByLabelText('Комментарий');
       fireEvent.change(commentInput, {
         target: { value: 'Новый комментарий' },
@@ -173,9 +185,9 @@ describe('OpeningManagerBidModal', () => {
         expect(mockUpdateBid).toHaveBeenCalledWith(
           1,
           {
-            openning_date: null,
+            openning_date: '2024-02-20',
             manager_comment: 'Новый комментарий',
-            opened: false,
+            opened: true,
           },
           true
         );
@@ -208,7 +220,7 @@ describe('OpeningManagerBidModal', () => {
     });
 
     it('конвертирует дату из DD.MM.YYYY в YYYY-MM-DD при сабмите', async () => {
-      const bid = makeBid({ id: 1, openning_date: '2024-01-15' });
+      const bid = makeBid({ id: 1, openning_date: '2024-01-15', opened: true });
       mockBidStore.bid = bid;
       mockUpdateBid.mockResolvedValue(true);
 
@@ -241,6 +253,69 @@ describe('OpeningManagerBidModal', () => {
       fireEvent.click(submitButton);
 
       expect(mockUpdateBid).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('Валидация формы', () => {
+    it('показывает ошибку валидации для обязательного поля openning_date и opened', async () => {
+      mockBidStore.bid = makeBid();
+      renderOpeningManagerBidModal();
+
+      const submitButton = screen.getByText('Сохранить');
+      fireEvent.click(submitButton);
+
+      await waitFor(() => {
+        expect(
+          screen.getByText('Дата открытия обязательна для заполнения')
+        ).toBeInTheDocument();
+        expect(
+          screen.getByText('Необходимо подтвердить открытие')
+        ).toBeInTheDocument();
+      });
+    });
+
+    it('показывает ошибку валидации для чекбокса opened', async () => {
+      mockBidStore.bid = makeBid();
+      renderOpeningManagerBidModal();
+
+      const dateInput = screen.getByTestId('datePickerInput');
+      fireEvent.change(dateInput, { target: { value: '20.02.2024' } });
+
+      fireEvent.click(screen.getByRole('button', { name: 'Сохранить' }));
+
+      await waitFor(() => {
+        expect(
+          screen.queryByText('Дата открытия обязательна для заполнения')
+        ).not.toBeInTheDocument();
+        expect(
+          screen.queryByText('Необходимо подтвердить открытие')
+        ).toBeInTheDocument();
+      });
+    });
+
+    it('не показывает ошибки валидации когда все поля заполнены корректно', async () => {
+      mockBidStore.bid = makeBid();
+      renderOpeningManagerBidModal();
+
+      const dateInput = screen.getByTestId('datePickerInput');
+      fireEvent.change(dateInput, { target: { value: '20.02.2024' } });
+
+      const openedCheckbox = screen.getByLabelText('Открыто');
+      fireEvent.click(openedCheckbox);
+
+      const commentInput = screen.getByLabelText('Комментарий');
+      fireEvent.change(commentInput, {
+        target: { value: 'Новый комментарий' },
+      });
+
+      fireEvent.click(screen.getByRole('button', { name: 'Сохранить' }));
+
+      expect(
+        screen.queryByText('Дата открытия обязательна для заполнения')
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByText('Необходимо подтвердить открытие')
+      ).not.toBeInTheDocument();
     });
   });
 
