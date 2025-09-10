@@ -16,6 +16,7 @@ jest.mock('@/store/BidStore', () => ({
   updateBid: jest.fn(),
   bidError: null,
   setBidError: jest.fn(),
+  rejectBid: jest.fn(),
 }));
 
 const mockBidStore = bidStore as jest.Mocked<typeof bidStore>;
