@@ -129,6 +129,16 @@ class BidStore {
             ...this.untouchedBids,
             { ...movedBid, ...data },
           ]);
+        } else {
+          const updatedUntouched = this.untouchedBids.map((bid) =>
+            bid.id === id
+              ? {
+                  ...bid,
+                  ...updatedData,
+                }
+              : bid
+          );
+          this.setuntouchedBids(updatedUntouched);
         }
       }
       return true;
