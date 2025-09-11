@@ -160,7 +160,7 @@ const TitleBidModal = ({ open, onClose }: TitleModalProps) => {
                 </AccordionDetails>
               </Accordion>
               <TextField
-                id='comment'
+                id='pickup_address'
                 label='Адрес забора'
                 multiline
                 maxRows={4}
