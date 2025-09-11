@@ -192,6 +192,31 @@ describe('BidStore', () => {
       });
     });
 
+    it('обновляет заявку в untouched при inProgressCondition=false если заявка не найдена в inProgress', async () => {
+      bidStore.setuntouchedBids([makeBid({ id: 4, brand: 'D' })]);
+
+      changeBidMock.mockResolvedValue({
+        data: { vehicle_transporter: 2 },
+      } as AxiosResponse<{ vehicle_transporter: number }>);
+
+      const formData = { c: 5 } as unknown as
+        | BidFormData
+        | OpeningManagerBidFormData
+        | TitleBidFormData
+        | InspectorBidFormData
+        | LogistBidLoadingFormData;
+      const ok = await bidStore.updateBid(4, formData, false);
+      expect(ok).toBe(true);
+
+      expect(bidStore.untouchedBids.find((b) => b.id === 4)).toMatchObject({
+        brand: 'BMW',
+        c: 5,
+        vehicle_transporter: 2,
+      });
+
+      expect(bidStore.inProgressBids.find((b) => b.id === 4)).toBeUndefined();
+    });
+
     it('при ошибке устанавливает bidError и возвращает false', async () => {
       changeBidMock.mockRejectedValue(new Error('fail'));
       getAPIErrorMessageMock.mockReturnValue('Ошибка обновления');
