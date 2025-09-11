@@ -188,9 +188,9 @@ describe('TitleBidModal', () => {
           {
             pickup_address: 'ул. Пушкина, д. 5',
             took_title: 'yes',
-            title_collection_date: expect.any(String), // Дата в формате YYYY-MM-DD
+            title_collection_date: expect.any(String),
           },
-          true // completedCondition = true для 'yes'
+          true
         );
         expect(mockedShowNotification).toHaveBeenCalledWith(
           'Данные успешно изменены!',
@@ -219,7 +219,7 @@ describe('TitleBidModal', () => {
             took_title: 'consignment',
             title_collection_date: expect.any(String),
           },
-          true // completedCondition = true для 'consignment'
+          true
         );
       });
     });
@@ -243,7 +243,7 @@ describe('TitleBidModal', () => {
             took_title: 'no',
             title_collection_date: null,
           },
-          false // completedCondition = false для 'no'
+          false
         );
       });
     });
@@ -256,7 +256,8 @@ describe('TitleBidModal', () => {
 
       const tookTitleSelect = screen.getByLabelText('Забрал тайтл');
       await userEvent.click(tookTitleSelect);
-      await userEvent.click(screen.getByText('Да'));
+      const yesOption = screen.getByRole('option', { name: 'Да' });
+      await userEvent.click(yesOption);
 
       await userEvent.click(screen.getByRole('button', { name: 'Сохранить' }));
 
@@ -276,7 +277,8 @@ describe('TitleBidModal', () => {
 
       const tookTitleSelect = screen.getByLabelText('Забрал тайтл');
       await userEvent.click(tookTitleSelect);
-      await userEvent.click(screen.getByText('Да'));
+      const yesOption = screen.getByRole('option', { name: 'Да' });
+      await userEvent.click(yesOption);
 
       await userEvent.click(screen.getByRole('button', { name: 'Сохранить' }));
 
@@ -326,7 +328,8 @@ describe('TitleBidModal', () => {
 
       const tookTitleSelect = screen.getByLabelText('Забрал тайтл');
       await userEvent.click(tookTitleSelect);
-      await userEvent.click(screen.getByText('Да'));
+      const yesOption = screen.getByRole('option', { name: 'Да' });
+      await userEvent.click(yesOption);
 
       await userEvent.click(screen.getByRole('button', { name: 'Сохранить' }));
 
