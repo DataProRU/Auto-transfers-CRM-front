@@ -33,23 +33,7 @@ describe('TitleBidInfo', () => {
     });
 
     it('отображает все поля', () => {
-      const bid = makeBid({
-        brand: 'BMW',
-        model: 'X5',
-        vin: 'BMW123456789',
-        client: {
-          id: 1,
-          full_name: 'Анна Сидорова',
-          phone: '+9876543210',
-          telegram: '@anna',
-          company: null,
-          address: null,
-          email: 'anna@example.com',
-        },
-        transit_method: 're_export',
-        pickup_address: 'пр. Мира, д. 25',
-      });
-      renderTitleBidInfo(bid);
+      renderTitleBidInfo();
 
       expect(screen.getByText('BMW X5')).toBeInTheDocument();
       expect(screen.getByText('VIN: BMW123456789')).toBeInTheDocument();
