@@ -50,7 +50,10 @@ export const makeBid = (overrides: Partial<Bid> = {}): Bid => ({
   inspector_comment: null,
   export: false,
   prepared_documents: false,
-  vehicle_transporter: 1,
+  vehicle_transporter: {
+    id: 1,
+    number: 'АВ-123-45',
+  },
   logistician_keys_number: 1,
   vehicle_arrival_date: null,
   receive_vehicle: false,

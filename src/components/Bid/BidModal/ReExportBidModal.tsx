@@ -161,9 +161,11 @@ const ReExportBidModal = ({ open, onClose }: ReExportModalProps) => {
                       fullWidth
                       disabled
                       value={
-                        moment(bid?.title_collection_date).format(
-                          'DD.MM.YYYY'
-                        ) || ''
+                        bid?.title_collection_date
+                          ? moment(bid.title_collection_date).format(
+                              'DD.MM.YYYY'
+                            )
+                          : ''
                       }
                     />
                   </Stack>

@@ -1,9 +1,9 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import OpeningManagerBidModal from '../OpeningManagerBidModal';
 import { makeBid } from '@/utils/test/factories.ts';
 import bidStore from '@/store/BidStore';
-
+import userEvent from '@testing-library/user-event';
 const mockedShowNotification = jest.fn();
 jest.mock('@/providers/Notification', () => ({
   useNotification: () => ({
@@ -99,7 +99,7 @@ describe('OpeningManagerBidModal', () => {
       mockBidStore.bid = bid;
       renderOpeningManagerBidModal();
 
-      fireEvent.click(screen.getByText('Информация о заявке'));
+      userEvent.click(screen.getByText('Информация о заявке'));
 
       expect(screen.getByDisplayValue('Toyota')).toBeInTheDocument();
       expect(screen.getByDisplayValue('Camry')).toBeInTheDocument();
@@ -118,12 +118,27 @@ describe('OpeningManagerBidModal', () => {
       mockBidStore.bid = bid;
       renderOpeningManagerBidModal();
 
-      fireEvent.click(screen.getByText('Информация о заявке'));
+      userEvent.click(screen.getByText('Информация о заявке'));
 
-      const disabledFields = screen
-        .getAllByRole('textbox')
-        .filter((field) => field.hasAttribute('disabled'));
-      expect(disabledFields.length).toBeGreaterThan(0);
+      const brandField = screen.getByLabelText('Марка');
+      const modelField = screen.getByLabelText('Модель');
+      const vinField = screen.getByLabelText('VIN');
+      const containerNumberField = screen.getByLabelText('Номер контейнера');
+      const arrivalDateField = screen.getByLabelText(
+        'Предпологаемая дата прибытия контейнера'
+      );
+      const recipientField = screen.getByLabelText('Получатель');
+      const transporterField = screen.getByLabelText('Перевозчик');
+      const transitMethodField = screen.getByLabelText('Метод тразита');
+
+      expect(brandField).toBeDisabled();
+      expect(modelField).toBeDisabled();
+      expect(vinField).toBeDisabled();
+      expect(containerNumberField).toBeDisabled();
+      expect(arrivalDateField).toBeDisabled();
+      expect(recipientField).toBeDisabled();
+      expect(transporterField).toBeDisabled();
+      expect(transitMethodField).toBeDisabled();
     });
   });
 
@@ -172,15 +187,13 @@ describe('OpeningManagerBidModal', () => {
       const openedCheckbox = screen.getByLabelText(
         'Открыто'
       ) as HTMLInputElement;
-      fireEvent.click(openedCheckbox);
+      await userEvent.click(openedCheckbox);
 
       const commentInput = screen.getByLabelText('Комментарий');
-      fireEvent.change(commentInput, {
-        target: { value: 'Новый комментарий' },
-      });
+      await userEvent.type(commentInput, 'Новый комментарий');
 
       const submitButton = screen.getByText('Сохранить');
-      fireEvent.click(submitButton);
+      await userEvent.click(submitButton);
 
       await waitFor(() => {
         expect(mockUpdateBid).toHaveBeenCalledWith(
@@ -210,7 +223,7 @@ describe('OpeningManagerBidModal', () => {
       renderOpeningManagerBidModal();
 
       const submitButton = screen.getByText('Сохранить');
-      fireEvent.click(submitButton);
+      await userEvent.click(submitButton);
 
       await waitFor(() => {
         expect(mockedShowNotification).toHaveBeenCalledWith(
@@ -233,7 +246,7 @@ describe('OpeningManagerBidModal', () => {
 
       fireEvent.change(dateInput, { target: { value: '20.02.2024' } });
 
-      fireEvent.click(screen.getByText('Сохранить'));
+      await userEvent.click(screen.getByText('Сохранить'));
 
       await waitFor(() => {
         expect(mockUpdateBid).toHaveBeenCalledWith(
@@ -246,12 +259,12 @@ describe('OpeningManagerBidModal', () => {
       });
     });
 
-    it('не отправляет форму без bid', () => {
+    it('не отправляет форму без bid', async () => {
       mockBidStore.bid = null;
       renderOpeningManagerBidModal();
 
       const submitButton = screen.getByText('Сохранить');
-      fireEvent.click(submitButton);
+      await userEvent.click(submitButton);
 
       expect(mockUpdateBid).not.toHaveBeenCalled();
     });
@@ -263,7 +276,7 @@ describe('OpeningManagerBidModal', () => {
       renderOpeningManagerBidModal();
 
       const submitButton = screen.getByText('Сохранить');
-      fireEvent.click(submitButton);
+      await userEvent.click(submitButton);
 
       await waitFor(() => {
         expect(
@@ -282,7 +295,7 @@ describe('OpeningManagerBidModal', () => {
       const dateInput = screen.getByTestId('datePickerInput');
       fireEvent.change(dateInput, { target: { value: '20.02.2024' } });
 
-      fireEvent.click(screen.getByRole('button', { name: 'Сохранить' }));
+      await userEvent.click(screen.getByRole('button', { name: 'Сохранить' }));
 
       await waitFor(() => {
         expect(
@@ -302,14 +315,12 @@ describe('OpeningManagerBidModal', () => {
       fireEvent.change(dateInput, { target: { value: '20.02.2024' } });
 
       const openedCheckbox = screen.getByLabelText('Открыто');
-      fireEvent.click(openedCheckbox);
+      await userEvent.click(openedCheckbox);
 
       const commentInput = screen.getByLabelText('Комментарий');
-      fireEvent.change(commentInput, {
-        target: { value: 'Новый комментарий' },
-      });
+      await userEvent.type(commentInput, 'Новый комментарий');
 
-      fireEvent.click(screen.getByRole('button', { name: 'Сохранить' }));
+      await userEvent.click(screen.getByRole('button', { name: 'Сохранить' }));
 
       expect(
         screen.queryByText('Дата открытия обязательна для заполнения')
@@ -344,21 +355,21 @@ describe('OpeningManagerBidModal', () => {
   });
 
   describe('Закрытие модального окна', () => {
-    it('вызывает onClose при клике на кнопку Отмена', () => {
+    it('вызывает onClose при клике на кнопку Отмена', async () => {
       const onClose = jest.fn();
       renderOpeningManagerBidModal({ onClose });
 
-      fireEvent.click(screen.getByText('Отмена'));
+      await userEvent.click(screen.getByText('Отмена'));
       expect(onClose).toHaveBeenCalled();
     });
 
-    it('вызывает onClose при клике вне модального окна', () => {
+    it('вызывает onClose при клике вне модального окна', async () => {
       const onClose = jest.fn();
       renderOpeningManagerBidModal({ onClose });
 
       const backdrop = document.querySelector('.MuiBackdrop-root');
       if (backdrop) {
-        fireEvent.click(backdrop);
+        await userEvent.click(backdrop);
         expect(onClose).toHaveBeenCalled();
       }
     });
