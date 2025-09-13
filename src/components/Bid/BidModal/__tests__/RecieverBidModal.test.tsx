@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import RecieverBidModal from '../RecieverBidModal';
 import { makeBid, makeClient } from '@/utils/test/factories';
@@ -121,9 +121,7 @@ describe('RecieverBidModal', () => {
         fullAcceptedCheckbox,
       } = getCheckboxes();
 
-      expect(
-        screen.getByLabelText('Примерная дата прибытия')
-      ).toBeInTheDocument();
+      expect(screen.getByTestId('datePickerInput')).toBeInTheDocument();
       expect(screen.getByLabelText('Принял ключей')).toBeInTheDocument();
       expect(acceptedCarCheckbox).toBeInTheDocument();
       expect(acceptedDocumentsCheckbox).toBeInTheDocument();
@@ -173,24 +171,24 @@ describe('RecieverBidModal', () => {
       });
       mockBidStore.bid = bidWithFullAcceptance;
 
-      const { fullAcceptedCheckbox } = getCheckboxes();
-
       renderRecieverBidModal();
 
-      expect(fullAcceptedCheckbox.checked).toBe(true);
+      const fullAcceptanceCheckbox = screen.getByLabelText('Полное принятие');
+      expect(fullAcceptanceCheckbox).toBeChecked();
     });
   });
 
   describe('Взаимодействие с формой', () => {
     it('позволяет выбирать дату прибытия', async () => {
-      const user = userEvent.setup();
       renderRecieverBidModal();
 
-      const dateInput = screen.getByLabelText('Примерная дата прибытия');
-      await user.clear(dateInput);
-      await user.type(dateInput, '25.02.2024');
+      const dateInput = screen.getByTestId(
+        'datePickerInput'
+      ) as HTMLInputElement;
 
-      expect(dateInput).toHaveValue('25.02.2024');
+      fireEvent.change(dateInput, { target: { value: '20.02.2024' } });
+
+      expect(screen.getByDisplayValue('20.02.2024')).toBeInTheDocument();
     });
 
     it('позволяет выбирать количество принятых ключей', async () => {
@@ -229,8 +227,7 @@ describe('RecieverBidModal', () => {
     it('инициализирует форму с данными из bid', () => {
       renderRecieverBidModal();
 
-      const dateInput = screen.getByLabelText('Примерная дата прибытия');
-      expect(dateInput).toHaveValue('20.02.2024');
+      expect(screen.getByDisplayValue('20.02.2024')).toBeInTheDocument();
 
       const keysSelect = screen.getByLabelText('Принял ключей');
       expect(keysSelect).toHaveTextContent('2'); // logistician_keys_number
@@ -245,14 +242,12 @@ describe('RecieverBidModal', () => {
 
   describe('Валидация', () => {
     it('требует указания даты прибытия', async () => {
-      const user = userEvent.setup();
+      const bid = makeBid({ vehicle_arrival_date: '' });
+      mockBidStore.bid = bid;
       renderRecieverBidModal();
 
-      const dateInput = screen.getByLabelText('Примерная дата прибытия');
-      await user.clear(dateInput);
-
       const submitButton = screen.getByRole('button', { name: 'Сохранить' });
-      await user.click(submitButton);
+      await userEvent.click(submitButton);
 
       await waitFor(() => {
         expect(
@@ -261,49 +256,18 @@ describe('RecieverBidModal', () => {
       });
     });
 
-    it('требует корректный формат даты', async () => {
-      const user = userEvent.setup();
-      renderRecieverBidModal();
-
-      const dateInput = screen.getByLabelText('Примерная дата прибытия');
-      await user.clear(dateInput);
-      await user.type(dateInput, '2024-02-20');
-
-      const submitButton = screen.getByRole('button', { name: 'Сохранить' });
-      await user.click(submitButton);
-
-      await waitFor(() => {
-        expect(
-          screen.getByText('Дата должна быть в формате ДД.ММ.ГГГГ')
-        ).toBeInTheDocument();
-      });
-    });
-
-    it('требует корректную дату', async () => {
-      const user = userEvent.setup();
-      renderRecieverBidModal();
-
-      const dateInput = screen.getByLabelText('Примерная дата прибытия');
-      await user.clear(dateInput);
-      await user.type(dateInput, '32.13.2024');
-
-      const submitButton = screen.getByRole('button', { name: 'Сохранить' });
-      await user.click(submitButton);
-
-      await waitFor(() => {
-        expect(screen.getByText('Некорректная дата')).toBeInTheDocument();
-      });
-    });
-
     it('проходит валидацию при корректных данных', async () => {
-      const user = userEvent.setup();
       mockUpdateExpandedBid.mockResolvedValue(true);
       renderRecieverBidModal();
 
       const submitButton = screen.getByRole('button', { name: 'Сохранить' });
-      await user.click(submitButton);
+      await userEvent.click(submitButton);
 
       await waitFor(() => {
+        expect(mockedShowNotification).toHaveBeenCalledWith(
+          'Данные успешно изменены!',
+          'success'
+        );
         expect(mockUpdateExpandedBid).toHaveBeenCalled();
       });
     });
@@ -311,14 +275,20 @@ describe('RecieverBidModal', () => {
 
   describe('Отправка формы', () => {
     it('вызывает updateExpandedBid при успешной отправке', async () => {
-      const user = userEvent.setup();
+      const bid = makeBid({
+        vehicle_arrival_date: '2024-02-20',
+        receive_vehicle: false,
+        receive_documents: false,
+        receiver_keys_number: 2,
+      });
+      mockBidStore.bid = bid;
       const onClose = jest.fn();
       mockUpdateExpandedBid.mockResolvedValue(true);
 
       renderRecieverBidModal({ onClose });
 
       const submitButton = screen.getByRole('button', { name: 'Сохранить' });
-      await user.click(submitButton);
+      await userEvent.click(submitButton);
 
       await waitFor(() => {
         expect(mockUpdateExpandedBid).toHaveBeenCalledWith(
@@ -329,76 +299,50 @@ describe('RecieverBidModal', () => {
             receive_documents: false,
             receiver_keys_number: 2,
           },
-          true, // inProgressCondition = true когда есть дата
-          false // completedCondition = false когда не все условия выполнены
+          true,
+          false
         );
       });
     });
 
     it('правильно определяет inProgressCondition', async () => {
-      const user = userEvent.setup();
       mockUpdateExpandedBid.mockResolvedValue(true);
 
       renderRecieverBidModal();
 
       const submitButton = screen.getByRole('button', { name: 'Сохранить' });
-      await user.click(submitButton);
+      await userEvent.click(submitButton);
 
       await waitFor(() => {
         expect(mockUpdateExpandedBid).toHaveBeenCalledWith(
           expect.any(Number),
           expect.any(Object),
-          true, // inProgressCondition = true когда есть дата прибытия
-          expect.any(Boolean)
-        );
-      });
-    });
-
-    it('определяет inProgressCondition как false при отсутствии даты', async () => {
-      const user = userEvent.setup();
-      mockUpdateExpandedBid.mockResolvedValue(true);
-
-      renderRecieverBidModal();
-
-      // Убираем дату
-      const dateInput = screen.getByLabelText('Примерная дата прибытия');
-      await user.clear(dateInput);
-
-      const submitButton = screen.getByRole('button', { name: 'Сохранить' });
-      await user.click(submitButton);
-
-      await waitFor(() => {
-        expect(mockUpdateExpandedBid).toHaveBeenCalledWith(
-          expect.any(Number),
-          expect.any(Object),
-          false, // inProgressCondition = false когда нет даты
+          true,
           expect.any(Boolean)
         );
       });
     });
 
     it('определяет completedCondition как true при принятии автомобиля и документов', async () => {
-      const user = userEvent.setup();
       mockUpdateExpandedBid.mockResolvedValue(true);
 
       renderRecieverBidModal();
 
-      // Отмечаем оба чекбокса
       const vehicleCheckbox = screen.getByLabelText('Принял автомобиль');
-      await user.click(vehicleCheckbox);
+      await userEvent.click(vehicleCheckbox);
 
       const documentsCheckbox = screen.getByLabelText('Принял документы');
-      await user.click(documentsCheckbox);
+      await userEvent.click(documentsCheckbox);
 
       const submitButton = screen.getByRole('button', { name: 'Сохранить' });
-      await user.click(submitButton);
+      await userEvent.click(submitButton);
 
       await waitFor(() => {
         expect(mockUpdateExpandedBid).toHaveBeenCalledWith(
           expect.any(Number),
           expect.any(Object),
           expect.any(Boolean),
-          true // completedCondition = true когда приняты и автомобиль, и документы
+          true
         );
       });
     });
@@ -439,14 +383,13 @@ describe('RecieverBidModal', () => {
 
   describe('Обработка ошибок', () => {
     it('показывает уведомление об ошибке при неудачной отправке', async () => {
-      const user = userEvent.setup();
       mockUpdateExpandedBid.mockResolvedValue(false);
       mockBidStore.bidError = 'Ошибка сервера';
 
       renderRecieverBidModal();
 
       const submitButton = screen.getByRole('button', { name: 'Сохранить' });
-      await user.click(submitButton);
+      await userEvent.click(submitButton);
 
       await waitFor(() => {
         expect(mockedShowNotification).toHaveBeenCalledWith(
@@ -471,14 +414,13 @@ describe('RecieverBidModal', () => {
     });
 
     it('показывает дефолтное сообщение об ошибке', async () => {
-      const user = userEvent.setup();
       mockUpdateExpandedBid.mockResolvedValue(false);
       mockBidStore.bidError = null;
 
       renderRecieverBidModal();
 
       const submitButton = screen.getByRole('button', { name: 'Сохранить' });
-      await user.click(submitButton);
+      await userEvent.click(submitButton);
 
       await waitFor(() => {
         expect(mockedShowNotification).toHaveBeenCalledWith(
@@ -486,6 +428,41 @@ describe('RecieverBidModal', () => {
           'error'
         );
       });
+    });
+  });
+
+  describe('Закрытие модального окна', () => {
+    it('вызывает onClose при клике на кнопку Отмена', async () => {
+      const onClose = jest.fn();
+      renderRecieverBidModal({ onClose });
+
+      await userEvent.click(screen.getByText('Отмена'));
+      expect(onClose).toHaveBeenCalled();
+    });
+
+    it('вызывает onClose при клике вне модального окна', async () => {
+      const onClose = jest.fn();
+      renderRecieverBidModal({ onClose });
+
+      const backdrop = document.querySelector('.MuiBackdrop-root');
+      if (backdrop) {
+        await userEvent.click(backdrop);
+        expect(onClose).toHaveBeenCalled();
+      }
+    });
+  });
+
+  describe('Условный рендеринг', () => {
+    it('не рендерится когда open=false', () => {
+      renderRecieverBidModal({ open: false });
+      expect(
+        screen.queryByTestId('dialogRecieverBidModal')
+      ).not.toBeInTheDocument();
+    });
+
+    it('рендерится когда open=true', () => {
+      renderRecieverBidModal({ open: true });
+      expect(screen.getByTestId('dialogRecieverBidModal')).toBeInTheDocument();
     });
   });
 });

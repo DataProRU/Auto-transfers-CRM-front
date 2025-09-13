@@ -80,7 +80,7 @@ describe('OpeningManagerBidInfo', () => {
     });
 
     it('отображает Не указан для неизвестного метода', () => {
-      const bid = makeBid({ transit_method: 'unknown_method' as any });
+      const bid = makeBid({ transit_method: 'unknown_method' });
       renderOpeningManagerBidInfo(bid);
 
       expect(screen.getByText('Метод транзита: Не указан')).toBeInTheDocument();
