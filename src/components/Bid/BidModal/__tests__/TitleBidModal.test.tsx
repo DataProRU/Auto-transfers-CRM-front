@@ -19,7 +19,6 @@ jest.mock('@/store/BidStore', () => ({
   setBidError: jest.fn(),
 }));
 
-// Создаем defaultBid один раз для всех тестов
 const defaultBid = makeBid({
   brand: 'Toyota',
   model: 'Camry',
