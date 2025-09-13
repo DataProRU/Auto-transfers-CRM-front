@@ -46,8 +46,8 @@ class BidStore {
     this.сompletedBids = completedBids;
   };
 
-  setBidFromLoading = (isBidFromLOading: boolean) => {
-    this.isBidFromLoading = isBidFromLOading;
+  setBidFromLoading = (isBidFromLoading: boolean) => {
+    this.isBidFromLoading = isBidFromLoading;
   };
 
   constructor() {
