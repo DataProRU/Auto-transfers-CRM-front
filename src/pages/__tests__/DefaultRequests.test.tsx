@@ -32,10 +32,10 @@ jest.mock('@/store/AuthStore', () => ({
   },
 }));
 
-const renderDefaultRequests = () => {
+const renderDefaultRequests = (isTitle = false) => {
   return render(
     <BrowserRouter>
-      <DefaultRequests />
+      <DefaultRequests isTitle={isTitle} />
     </BrowserRouter>
   );
 };

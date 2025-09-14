@@ -18,8 +18,7 @@ describe('decodeToken', () => {
     jest.clearAllMocks();
   });
 
-  it('should return decoded payload for a valid token', () => {
-    // Настраиваем мок для успешного декодирования
+  it('возвращает декодированный payload для валидного токена', () => {
     (jwtDecode as jest.Mock).mockReturnValue(mockJwtPayload);
 
     const result = decodeToken('valid-token');
@@ -27,19 +26,17 @@ describe('decodeToken', () => {
     expect(jwtDecode).toHaveBeenCalledWith('valid-token');
   });
 
-  it('should return null when token is null', () => {
+  it('возвращает null когда токен равен null', () => {
     const result = decodeToken(null);
     expect(result).toBeNull();
     expect(jwtDecode).not.toHaveBeenCalled();
   });
 
-  it('should return null and log error for invalid token', () => {
-    // Настраиваем мок для выброса ошибки
+  it('возвращает null и логирует ошибку для невалидного токена', () => {
     (jwtDecode as jest.Mock).mockImplementation(() => {
       throw new Error('Invalid token');
     });
 
-    // Мокаем console.error
     const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
 
     const result = decodeToken('invalid-token');
@@ -50,12 +47,10 @@ describe('decodeToken', () => {
       expect.any(Error)
     );
 
-    // Очищаем мок console.error
     consoleErrorSpy.mockRestore();
   });
 
-  it('should return null for token with incomplete payload', () => {
-    // Настраиваем мок для возврата неполного payload
+  it('возвращает null для токена с неполным payload', () => {
     (jwtDecode as jest.Mock).mockReturnValue({
       user_id: 123,
       role: 'user',

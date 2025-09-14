@@ -27,6 +27,7 @@ class TransporterStore {
   fetchTransporters = action(async () => {
     try {
       this.setIsLoading(true);
+      this.setError(null);
       const response = await TransporterService.getTransporters();
 
       this.setTransporters(response.data);

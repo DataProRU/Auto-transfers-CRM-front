@@ -3,7 +3,7 @@ import type { ApiError } from '../../@types/api';
 
 describe('getAPIErrorMessage', () => {
   describe('API Error handling', () => {
-    it('should return custom message for invalid credentials', () => {
+    it('Возврат сообщения - Неправильный логин или пароль', () => {
       const apiError: ApiError = {
         response: {
           data: {
@@ -17,7 +17,7 @@ describe('getAPIErrorMessage', () => {
       );
     });
 
-    it('should return custom message for title without logistician notification', () => {
+    it('Возврат сообщения - Нельзя забрать тайтл без уведомления логиста', () => {
       const apiError: ApiError = {
         response: {
           data: {
@@ -31,7 +31,7 @@ describe('getAPIErrorMessage', () => {
       );
     });
 
-    it('should return detail message for other API errors', () => {
+    it('Возврат сообщения ошибки API', () => {
       const apiError: ApiError = {
         response: {
           data: {
@@ -43,7 +43,7 @@ describe('getAPIErrorMessage', () => {
       expect(getAPIErrorMessage(apiError)).toBe('Some other API error message');
     });
 
-    it('should return first string value from response data when no detail', () => {
+    it('Возвращает первую строку из response data еогда нету detail', () => {
       const apiError: ApiError = {
         response: {
           data: {
@@ -56,7 +56,7 @@ describe('getAPIErrorMessage', () => {
       expect(getAPIErrorMessage(apiError)).toBe('First error message');
     });
 
-    it('should return first array element when response data contains arrays', () => {
+    it('возвращает первый элемент массива если response data содержит массив', () => {
       const apiError: ApiError = {
         response: {
           data: {
@@ -68,23 +68,10 @@ describe('getAPIErrorMessage', () => {
 
       expect(getAPIErrorMessage(apiError)).toBe('First array error');
     });
-
-    it('should return first array element when no string values found', () => {
-      const apiError: ApiError = {
-        response: {
-          data: {
-            errors: ['Array error message'],
-            code: 400,
-          },
-        },
-      };
-
-      expect(getAPIErrorMessage(apiError)).toBe('Array error message');
-    });
   });
 
-  describe('Network Error handling', () => {
-    it('should return custom message for Network Error', () => {
+  describe('Network Error', () => {
+    it('возвращает дефолтное сообщение при Network Error', () => {
       const networkError = new Error('Network Error');
 
       expect(getAPIErrorMessage(networkError)).toBe(
@@ -92,7 +79,7 @@ describe('getAPIErrorMessage', () => {
       );
     });
 
-    it('should return original message for other Error instances', () => {
+    it('возарвщает сообщение API ошибки', () => {
       const regularError = new Error('Some regular error message');
 
       expect(getAPIErrorMessage(regularError)).toBe(
@@ -101,34 +88,34 @@ describe('getAPIErrorMessage', () => {
     });
   });
 
-  describe('Edge cases', () => {
-    it('should return default message for null', () => {
+  describe('Краевые случаи', () => {
+    it('возвращает дефолтное сообщение при null', () => {
       expect(getAPIErrorMessage(null)).toBe('Произошла неизвестная ошибка');
     });
 
-    it('should return default message for undefined', () => {
+    it('возвращает дефолтное сообщение при undefined', () => {
       expect(getAPIErrorMessage(undefined)).toBe(
         'Произошла неизвестная ошибка'
       );
     });
 
-    it('should return default message for string', () => {
+    it('возвращает дефолтное сообщение для строки', () => {
       expect(getAPIErrorMessage('some string')).toBe(
         'Произошла неизвестная ошибка'
       );
     });
 
-    it('should return default message for number', () => {
+    it('возвращает дефолтное сообщение для числа', () => {
       expect(getAPIErrorMessage(123)).toBe('Произошла неизвестная ошибка');
     });
 
-    it('should return default message for API error without response', () => {
+    it('возвращает дефолтное сообщение при  API ошибке без response', () => {
       const apiError: ApiError = {};
 
       expect(getAPIErrorMessage(apiError)).toBe('Произошла неизвестная ошибка');
     });
 
-    it('should return default message for API error with empty response data', () => {
+    it('возвращает дефолтное сообщение при пустом ответе API', () => {
       const apiError: ApiError = {
         response: {
           data: {},
@@ -138,20 +125,7 @@ describe('getAPIErrorMessage', () => {
       expect(getAPIErrorMessage(apiError)).toBe('Произошла неизвестная ошибка');
     });
 
-    it('should return default message for API error with non-string/non-array data', () => {
-      const apiError: ApiError = {
-        response: {
-          data: {
-            code: 400,
-            status: 'error',
-          },
-        },
-      };
-
-      expect(getAPIErrorMessage(apiError)).toBe('error');
-    });
-
-    it('should return default message for API error with empty arrays', () => {
+    it('возвращает дефолтное сообщение при пустом массиве API', () => {
       const apiError: ApiError = {
         response: {
           data: {

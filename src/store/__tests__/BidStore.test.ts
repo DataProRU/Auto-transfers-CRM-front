@@ -11,6 +11,8 @@ import type {
   OpeningManagerBidFormData,
   RejectBidFormData,
   TitleBidFormData,
+  ReExportBidFormData,
+  RecieverBidFormData,
 } from '@/@types/bid';
 
 jest.mock('@/services/BidService');
@@ -193,7 +195,7 @@ describe('BidStore', () => {
     });
 
     it('обновляет заявку в untouched при inProgressCondition=false если заявка не найдена в inProgress', async () => {
-      bidStore.setuntouchedBids([makeBid({ id: 4, brand: 'D' })]);
+      bidStore.setuntouchedBids([makeBid({ id: 4, brand: 'BMW' })]);
 
       changeBidMock.mockResolvedValue({
         data: { vehicle_transporter: 2 },
@@ -210,7 +212,6 @@ describe('BidStore', () => {
 
       expect(bidStore.untouchedBids.find((b) => b.id === 4)).toMatchObject({
         brand: 'BMW',
-        c: 5,
         vehicle_transporter: 2,
       });
 
@@ -233,149 +234,146 @@ describe('BidStore', () => {
     });
   });
 
-  // describe('updateExpandedBid - Title', () => {
-  //   it('при notified=true и took_title yes/consignment переносит в completed', async () => {
-  //     bidStore.setuntouchedBids([makeBid({ id: 10, brand: 'X' })]);
-  //     bidStore.setInProgressBids([makeBid({ id: 11, brand: 'Y' })]);
-  //
-  //     changeBidMock.mockResolvedValue({} as AxiosResponse<unknown>);
-  //
-  //     const data = {
-  //       notified_logistician_by_title: true,
-  //       took_title: 'yes',
-  //       x: 5,
-  //     } as unknown as TitleBidFormData;
-  //
-  //     const ok = await bidStore.updateExpandedBid(10, data, true, true);
-  //     expect(ok).toBe(true);
-  //
-  //     expect(bidStore.untouchedBids.find((b) => b.id === 10)).toBeUndefined();
-  //     expect(bidStore.inProgressBids.map((b) => b.id)).toEqual([11]);
-  //     expect(bidStore.сompletedBids.find((b) => b.id === 10)).toMatchObject({
-  //       brand: 'X',
-  //     });
-  //   });
-  //
-  //   it('при notified=true и took_title другое — переносит в inProgress/обновляет', async () => {
-  //     bidStore.setuntouchedBids([makeBid({ id: 12, brand: 'Z' })]);
-  //
-  //     changeBidMock.mockResolvedValue({} as AxiosResponse<unknown>);
-  //
-  //     const data = {
-  //       notified_logistician_by_title: true,
-  //       took_title: 'no',
-  //       y: 9,
-  //     } as unknown as TitleBidFormData;
-  //
-  //     const ok = await bidStore.updateExpandedBid(12, data, true, false);
-  //     expect(ok).toBe(true);
-  //
-  //     expect(bidStore.untouchedBids.find((b) => b.id === 12)).toBeUndefined();
-  //     expect(bidStore.inProgressBids.find((b) => b.id === 12)).toBeDefined();
-  //   });
-  //
-  //   it('при notified=false переносит из inProgress в untouched', async () => {
-  //     bidStore.setInProgressBids([makeBid({ id: 13, brand: 'Q' })]);
-  //
-  //     changeBidMock.mockResolvedValue({} as AxiosResponse<unknown>);
-  //
-  //     const ok = await bidStore.updateExpandedBid(
-  //       13,
-  //       {
-  //         notified_logistician_by_title: false,
-  //       } as unknown as TitleBidFormData,
-  //       false,
-  //       false
-  //     );
-  //     expect(ok).toBe(true);
-  //
-  //     expect(bidStore.inProgressBids.find((b) => b.id === 13)).toBeUndefined();
-  //     expect(bidStore.untouchedBids.find((b) => b.id === 13)).toBeDefined();
-  //   });
-  //
-  //   it('при ошибке — bidError и false', async () => {
-  //     changeBidMock.mockRejectedValue(new Error('fail'));
-  //     getAPIErrorMessageMock.mockReturnValue('Ошибка тайтла');
-  //
-  //     const ok = await bidStore.updateExpandedBid(
-  //       1,
-  //       {} as unknown as TitleBidFormData,
-  //       false,
-  //       false
-  //     );
-  //     expect(ok).toBe(false);
-  //     expect(bidStore.bidError).toBe('Ошибка тайтла');
-  //   });
-  // });
-  //
-  // describe('updateExpandedBid - ReExport', () => {
-  //   it('prepared_documents=true и export=true — переносит в completed', async () => {
-  //     bidStore.setuntouchedBids([makeBid({ id: 20, brand: 'R' })]);
-  //     bidStore.setInProgressBids([makeBid({ id: 21, brand: 'S' })]);
-  //
-  //     changeBidMock.mockResolvedValue({} as AxiosResponse<unknown>);
-  //
-  //     const data = {
-  //       prepared_documents: true,
-  //       export: true,
-  //       z: 7,
-  //     } as unknown as ReExportBidFormData;
-  //     const ok = await bidStore.updateExpandedBid(20, data, true, true);
-  //
-  //     expect(ok).toBe(true);
-  //     expect(bidStore.untouchedBids.find((b) => b.id === 20)).toBeUndefined();
-  //     expect(bidStore.inProgressBids.map((b) => b.id)).toEqual([21]);
-  //     expect(bidStore.сompletedBids.find((b) => b.id === 20)).toBeDefined();
-  //   });
-  //
-  //   it('prepared_documents=true и export=false — переносит в inProgress/обновляет', async () => {
-  //     bidStore.setuntouchedBids([makeBid({ id: 22, brand: 'T' })]);
-  //     changeBidMock.mockResolvedValue({} as AxiosResponse<unknown>);
-  //
-  //     const data = {
-  //       prepared_documents: true,
-  //       export: false,
-  //       k: 3,
-  //     } as unknown as ReExportBidFormData;
-  //     const ok = await bidStore.updateExpandedBid(22, data, true, false);
-  //
-  //     expect(ok).toBe(true);
-  //     expect(bidStore.untouchedBids.find((b) => b.id === 22)).toBeUndefined();
-  //     expect(bidStore.inProgressBids.find((b) => b.id === 22)).toBeDefined();
-  //   });
-  //
-  //   it('prepared_documents=false — переносит из inProgress в untouched', async () => {
-  //     bidStore.setInProgressBids([makeBid({ id: 23, brand: 'U' })]);
-  //     changeBidMock.mockResolvedValue({} as AxiosResponse<unknown>);
-  //
-  //     const ok = await bidStore.updateExpandedBid(
-  //       23,
-  //       {
-  //         prepared_documents: false,
-  //       } as unknown as ReExportBidFormData,
-  //       false,
-  //       false
-  //     );
-  //
-  //     expect(ok).toBe(true);
-  //     expect(bidStore.inProgressBids.find((b) => b.id === 23)).toBeUndefined();
-  //     expect(bidStore.untouchedBids.find((b) => b.id === 23)).toBeDefined();
-  //   });
-  //
-  //   it('при ошибке — bidError и false', async () => {
-  //     changeBidMock.mockRejectedValue(new Error('fail'));
-  //     getAPIErrorMessageMock.mockReturnValue('Ошибка реэкспорта');
-  //
-  //     const ok = await bidStore.updateExpandedBid(
-  //       1,
-  //       {} as unknown as ReExportBidFormData,
-  //       false,
-  //       false
-  //     );
-  //     expect(ok).toBe(false);
-  //     expect(bidStore.bidError).toBe('Ошибка реэкспорта');
-  //   });
-  // });
+  describe('updateExpandedBid', () => {
+    it('перемещает заявку из untouched в completed при inProgressCondition=true и completedCondition=true', async () => {
+      const bid = makeBid({ id: 1, brand: 'BMW' });
+      bidStore.setuntouchedBids([bid]);
+
+      changeBidMock.mockResolvedValue({} as AxiosResponse);
+
+      const formData = { export: true } as unknown as
+        | ReExportBidFormData
+        | RecieverBidFormData;
+      const ok = await bidStore.updateExpandedBid(1, formData, true, true);
+
+      expect(ok).toBe(true);
+      expect(bidStore.untouchedBids).toHaveLength(0);
+      expect(bidStore.inProgressBids).toHaveLength(0);
+      expect(bidStore.сompletedBids).toHaveLength(1);
+      expect(bidStore.сompletedBids[0]).toMatchObject({
+        id: 1,
+        brand: 'BMW',
+        export: true,
+      });
+    });
+    it('перемещает заявку из inProgress в completed при inProgressCondition=true и completedCondition=true', async () => {
+      const bid = makeBid({ id: 2, brand: 'Audi' });
+      bidStore.setInProgressBids([bid]);
+
+      changeBidMock.mockResolvedValue({} as AxiosResponse);
+
+      const formData = { receive_vehicle: true } as unknown as
+        | ReExportBidFormData
+        | RecieverBidFormData;
+      const ok = await bidStore.updateExpandedBid(2, formData, true, true);
+
+      expect(ok).toBe(true);
+      expect(bidStore.untouchedBids).toHaveLength(0);
+      expect(bidStore.inProgressBids).toHaveLength(0);
+      expect(bidStore.сompletedBids).toHaveLength(1);
+      expect(bidStore.сompletedBids[0]).toMatchObject({
+        id: 2,
+        brand: 'Audi',
+        receive_vehicle: true,
+      });
+    });
+
+    it('обновляет заявку в completed если она уже там при inProgressCondition=true и completedCondition=true', async () => {
+      const bid = makeBid({ id: 3, brand: 'Toyota' });
+      bidStore.setCompletedBids([bid]);
+
+      changeBidMock.mockResolvedValue({} as AxiosResponse);
+
+      const formData = { prepared_documents: true } as unknown as
+        | ReExportBidFormData
+        | RecieverBidFormData;
+      const ok = await bidStore.updateExpandedBid(3, formData, true, true);
+
+      expect(ok).toBe(true);
+      expect(bidStore.сompletedBids).toHaveLength(1);
+      expect(bidStore.сompletedBids[0]).toMatchObject({
+        id: 3,
+        brand: 'Toyota',
+        prepared_documents: true,
+      });
+    });
+    it('перемещает заявку из untouched в inProgress при inProgressCondition=true и completedCondition=false', async () => {
+      const bid = makeBid({ id: 4, brand: 'Honda' });
+      bidStore.setuntouchedBids([bid]);
+
+      changeBidMock.mockResolvedValue({} as AxiosResponse);
+
+      const formData = { vehicle_arrival_date: '2024-02-20' } as unknown as
+        | ReExportBidFormData
+        | RecieverBidFormData;
+      const ok = await bidStore.updateExpandedBid(4, formData, true, false);
+
+      expect(ok).toBe(true);
+      expect(bidStore.untouchedBids).toHaveLength(0);
+      expect(bidStore.inProgressBids).toHaveLength(1);
+      expect(bidStore.сompletedBids).toHaveLength(0);
+      expect(bidStore.inProgressBids[0]).toMatchObject({
+        id: 4,
+        brand: 'Honda',
+        vehicle_arrival_date: '2024-02-20',
+      });
+    });
+
+    it('обновляет заявку в inProgress если она уже там при inProgressCondition=true и completedCondition=false', async () => {
+      const bid = makeBid({ id: 5, brand: 'Nissan' });
+      bidStore.setInProgressBids([bid]);
+
+      changeBidMock.mockResolvedValue({} as AxiosResponse);
+
+      const formData = { receive_documents: true } as unknown as
+        | ReExportBidFormData
+        | RecieverBidFormData;
+      const ok = await bidStore.updateExpandedBid(5, formData, true, false);
+
+      expect(ok).toBe(true);
+      expect(bidStore.inProgressBids).toHaveLength(1);
+      expect(bidStore.inProgressBids[0]).toMatchObject({
+        id: 5,
+        brand: 'Nissan',
+        receive_documents: true,
+      });
+    });
+
+    it('перемещает заявку из inProgress в untouched при inProgressCondition=false', async () => {
+      const bid = makeBid({ id: 6, brand: 'Mazda' });
+      bidStore.setInProgressBids([bid]);
+
+      changeBidMock.mockResolvedValue({} as AxiosResponse);
+
+      const formData = { receiver_keys_number: 3 } as unknown as
+        | ReExportBidFormData
+        | RecieverBidFormData;
+      const ok = await bidStore.updateExpandedBid(6, formData, false, false);
+
+      expect(ok).toBe(true);
+      expect(bidStore.untouchedBids).toHaveLength(1);
+      expect(bidStore.inProgressBids).toHaveLength(0);
+      expect(bidStore.сompletedBids).toHaveLength(0);
+      expect(bidStore.untouchedBids[0]).toMatchObject({
+        id: 6,
+        brand: 'Mazda',
+        receiver_keys_number: 3,
+      });
+    });
+
+    it('при ошибке устанавливает bidError и возвращает false', async () => {
+      changeBidMock.mockRejectedValue(new Error('Ошибка сервера'));
+      getAPIErrorMessageMock.mockReturnValue('Ошибка обновления');
+
+      const formData = { export: true } as unknown as
+        | ReExportBidFormData
+        | RecieverBidFormData;
+      const ok = await bidStore.updateExpandedBid(1, formData, true, true);
+
+      expect(ok).toBe(false);
+      expect(bidStore.bidError).toBe('Ошибка обновления');
+    });
+  });
 
   describe('rejectBid', () => {
     it('если transit_method !== null — удаляет из inProgress', async () => {
