@@ -89,7 +89,7 @@ describe('Auth Page', () => {
       screen.getByLabelText(/Номер телефона \/ Логин/i)
     ).toBeInTheDocument();
     expect(screen.getByLabelText(/Пароль/i)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /Войти/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Войти' })).toBeInTheDocument();
   });
 
   it('поля логин и пароль имеют required', () => {
@@ -112,19 +112,6 @@ describe('Auth Page', () => {
     expect(phoneInput).toHaveValue('+7 999 123-45-67');
   });
 
-  // it('MuiTelInput показывает ошибку валидации при пустом значении', async () => {
-  //   renderAuth();
-  //
-  //   const passwordInput = screen.getByLabelText(/Пароль/i);
-  //
-  //   await userEvent.type(passwordInput, 'validpassword123');
-  //   await userEvent.click(screen.getByRole('button', { name: /Войти/i }));
-  //
-  //   expect(
-  //     await screen.findByText(/Логин обязателен для заполнения/i)
-  //   ).toBeInTheDocument();
-  // });
-
   it('MuiTelInput корректно передает значение в форму', async () => {
     const mockResponse = {
       data: {
@@ -142,7 +129,7 @@ describe('Auth Page', () => {
 
     await userEvent.type(phoneInput, '+7 999 123 45 67');
     await userEvent.type(passwordInput, 'validpassword123');
-    await userEvent.click(screen.getByRole('button', { name: /Войти/i }));
+    await userEvent.click(screen.getByRole('button', { name: 'Войти' }));
 
     await waitFor(() => {
       expect(authStore.login).toHaveBeenCalledWith(
@@ -169,7 +156,7 @@ describe('Auth Page', () => {
 
     await userEvent.type(phoneInput, '+7 999 123 45 67');
     await userEvent.type(passwordInput, 'validpassword123');
-    await userEvent.click(screen.getByRole('button', { name: /Войти/i }));
+    await userEvent.click(screen.getByRole('button', { name: 'Войти' }));
 
     await waitFor(() => {
       expect(authStore.login).toHaveBeenCalledWith(
@@ -187,7 +174,7 @@ describe('Auth Page', () => {
       'testuser'
     );
     await userEvent.type(screen.getByLabelText(/Пароль/i), '123');
-    await userEvent.click(screen.getByRole('button', { name: /Войти/i }));
+    await userEvent.click(screen.getByRole('button', { name: 'Войти' }));
 
     expect(
       await screen.findByText(/Пароль должен состоянить минимум из 8 символов/i)
@@ -212,7 +199,7 @@ describe('Auth Page', () => {
     );
     await userEvent.type(screen.getByLabelText(/Пароль/i), 'validpassword123');
 
-    await userEvent.click(screen.getByRole('button', { name: /Войти/i }));
+    await userEvent.click(screen.getByRole('button', { name: 'Войти' }));
 
     await waitFor(() => {
       expect(authStore.login).toHaveBeenCalledWith(
@@ -239,7 +226,7 @@ describe('Auth Page', () => {
       target: { value: 'wrongpass' },
     });
 
-    fireEvent.click(screen.getByRole('button', { name: /Войти/i }));
+    fireEvent.click(screen.getByRole('button', { name: 'Войти' }));
 
     await waitFor(() => {
       expect(mockedShowNotification).toHaveBeenCalledWith(
