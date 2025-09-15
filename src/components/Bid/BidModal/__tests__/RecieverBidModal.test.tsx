@@ -381,6 +381,44 @@ describe('RecieverBidModal', () => {
     });
   });
 
+  describe('Валидация формы', () => {
+    beforeEach(() => {
+      mockBidStore.bid = defaultBid;
+    });
+
+    it('валидация проходит при корректной дате', async () => {
+      renderRecieverBidModal();
+
+      await userEvent.type(screen.getByTestId('datePickerInput'), '15.02.2024');
+
+      const submitButton = screen.getByRole('button', { name: 'Сохранить' });
+      await userEvent.click(submitButton);
+
+      await waitFor(() => {
+        expect(mockUpdateExpandedBid).toHaveBeenCalled();
+      });
+    });
+
+    it('показывает ошибку при очистке поля даты', async () => {
+      renderRecieverBidModal();
+
+      const datePickerInput = screen.getByTestId('datePickerInput');
+
+      await userEvent.type(datePickerInput, '15.02.2024');
+
+      await userEvent.clear(datePickerInput);
+
+      const form = document.querySelector('form');
+      fireEvent.submit(form!);
+
+      await waitFor(() => {
+        expect(
+          screen.getByText('Примерная дата прибытия не может быть пустой')
+        ).toBeInTheDocument();
+      });
+    });
+  });
+
   describe('Обработка ошибок', () => {
     it('показывает уведомление об ошибке при неудачной отправке', async () => {
       mockUpdateExpandedBid.mockResolvedValue(false);

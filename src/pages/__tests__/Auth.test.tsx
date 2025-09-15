@@ -60,13 +60,19 @@ jest.mock('mui-tel-input', () => ({
     langOfCountryName?: string;
     [key: string]: unknown;
   }) => (
-    <input
-      value={value}
-      onChange={(e) => onChange?.(e.target.value)}
-      placeholder={label}
-      aria-label={label}
-      {...props}
-    />
+    <div>
+      <input
+        value={value}
+        onChange={(e) => onChange?.(e.target.value)}
+        placeholder={label}
+        aria-label={label}
+        aria-invalid={error ? 'true' : 'false'} // Добавляем aria-invalid
+        {...props}
+      />
+      {error && helperText && (
+        <div data-testid='helper-text'>{helperText}</div> // Добавляем helperText
+      )}
+    </div>
   ),
 }));
 
@@ -164,6 +170,28 @@ describe('Auth Page', () => {
         'validpassword123'
       );
     });
+  });
+
+  it('показывает ошибку при пустом логине через submit', async () => {
+    renderAuth();
+
+    const loginInput = screen.getByLabelText(/Номер телефона \/ Логин/i);
+    const passwordInput = screen.getByLabelText(/Пароль/i);
+
+    await userEvent.type(passwordInput, 'validpassword123');
+
+    loginInput.removeAttribute('required');
+
+    const form = document.querySelector('form');
+    fireEvent.submit(form!);
+
+    await waitFor(() => {
+      expect(loginInput).toHaveAttribute('aria-invalid', 'true');
+    });
+
+    expect(screen.getByTestId('helper-text')).toHaveTextContent(
+      'Логин обязателен для заполнения'
+    );
   });
 
   it('показывает ошибку при коротком пароле', async () => {
