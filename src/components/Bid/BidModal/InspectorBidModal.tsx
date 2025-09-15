@@ -201,8 +201,10 @@ const InspectorBidModal = ({ open, onClose }: InspectorModalProps) => {
                     >
                       <MenuItem value={'no'}>Нет</MenuItem>
                       <MenuItem value={'yes'}>Да</MenuItem>
-                      <MenuItem value={'consignment'}>Нужен осмотр</MenuItem>
-                      <MenuItem value={'consignment'}>
+                      <MenuItem value={'required_inspection'}>
+                        Нужен осмотр
+                      </MenuItem>
+                      <MenuItem value={'required_expertise'}>
                         Нужна экспертиза
                       </MenuItem>
                     </Select>
