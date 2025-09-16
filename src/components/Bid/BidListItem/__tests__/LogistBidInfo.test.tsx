@@ -80,7 +80,7 @@ describe('LogistBidInfo', () => {
     });
 
     it('отображает Не указан для неизвестного метода', () => {
-      const bid = makeBid({ transit_method: 'unknown_method' as any });
+      const bid = makeBid({ transit_method: 'unknown_method' });
       renderLogistBidInfo(bid);
 
       expect(screen.getByText('Метод транзита: Не указан')).toBeInTheDocument();

@@ -31,3 +31,9 @@ yarn dev
 ```bash
 yarn build
 ```
+
+## Запуск всех тестов
+
+```bash
+yarn test
+```

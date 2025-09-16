@@ -45,8 +45,11 @@ jest.mock('mui-tel-input', () => ({
     label,
     error,
     helperText,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     fullWidth,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     defaultCountry,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     langOfCountryName,
     ...props
   }: {
