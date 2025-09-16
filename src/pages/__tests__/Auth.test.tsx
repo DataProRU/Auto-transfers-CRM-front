@@ -69,12 +69,10 @@ jest.mock('mui-tel-input', () => ({
         onChange={(e) => onChange?.(e.target.value)}
         placeholder={label}
         aria-label={label}
-        aria-invalid={error ? 'true' : 'false'} // Добавляем aria-invalid
+        aria-invalid={error ? 'true' : 'false'}
         {...props}
       />
-      {error && helperText && (
-        <div data-testid='helper-text'>{helperText}</div> // Добавляем helperText
-      )}
+      {error && helperText && <div data-testid='helper-text'>{helperText}</div>}
     </div>
   ),
 }));
