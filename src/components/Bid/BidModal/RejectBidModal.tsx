@@ -53,6 +53,7 @@ const RejectBidModal = observer(({ open, onClose }: RejectBidModalProps) => {
 
   return (
     <Dialog
+      data-testid='dialogRejectBidModal'
       open={open}
       onClose={onClose}
       onSubmit={handleSubmit(onSubmit)}

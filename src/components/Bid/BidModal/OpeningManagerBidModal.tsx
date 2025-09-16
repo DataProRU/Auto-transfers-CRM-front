@@ -103,6 +103,7 @@ const OpeningManagerBidModal = ({
   return (
     <>
       <Dialog
+        data-testid='dialogOpeningManagerBidModal'
         open={open}
         onClose={onClose}
         component='form'
@@ -220,6 +221,9 @@ const OpeningManagerBidModal = ({
                         error: !!error,
                         helperText: error?.message || ' ',
                         fullWidth: true,
+                        inputProps: {
+                          'data-testid': 'datePickerInput',
+                        },
                       },
                     }}
                   />

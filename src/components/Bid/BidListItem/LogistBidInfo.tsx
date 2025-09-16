@@ -10,7 +10,7 @@ interface LogistBidInfoProps {
 
 const LogistBidInfo = ({ bid }: LogistBidInfoProps) => {
   return (
-    <Box sx={{ width: '100%' }}>
+    <Box data-testid='logistBidInfo' sx={{ width: '100%' }}>
       <Typography variant='subtitle1' fontWeight='bold'>
         {bid.brand} {bid.model}
       </Typography>

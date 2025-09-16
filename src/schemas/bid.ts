@@ -32,7 +32,7 @@ export const bidFormSchema = z
       return true;
     },
     {
-      message: 'Запрос тайтла обязателен при выборе "Без реэкспорта"',
+      message: 'Запрос тайтла обязателен при выборе "C реэкспортом"',
       path: ['requested_title'],
     }
   );

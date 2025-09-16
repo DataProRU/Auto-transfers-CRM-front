@@ -9,7 +9,7 @@ interface TitleBidInfoProps {
 
 const TitleBidInfo = ({ bid }: TitleBidInfoProps) => {
   return (
-    <Box sx={{ width: '100%' }}>
+    <Box data-testid='titleBidInfo' sx={{ width: '100%' }}>
       <Typography variant='subtitle1' fontWeight='bold'>
         {bid.brand} {bid.model}
       </Typography>

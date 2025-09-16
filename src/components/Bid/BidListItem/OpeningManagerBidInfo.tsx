@@ -10,7 +10,7 @@ interface OpeningManagerBidInfoProps {
 
 const OpeningManagerBidInfo = ({ bid }: OpeningManagerBidInfoProps) => {
   return (
-    <Box sx={{ width: '100%' }}>
+    <Box data-testid='openingManagerBidInfo' sx={{ width: '100%' }}>
       <Typography variant='subtitle1' fontWeight='bold'>
         {bid.brand} {bid.model}
       </Typography>

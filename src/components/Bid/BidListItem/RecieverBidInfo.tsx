@@ -10,7 +10,7 @@ interface RecieverBidInfoProps {
 
 const RecieverBidInfo = ({ bid }: RecieverBidInfoProps) => {
   return (
-    <Box sx={{ width: '100%' }}>
+    <Box data-testid='recieverBidInfo' sx={{ width: '100%' }}>
       <Typography variant='subtitle1' fontWeight='bold'>
         {bid.brand} {bid.model}
       </Typography>

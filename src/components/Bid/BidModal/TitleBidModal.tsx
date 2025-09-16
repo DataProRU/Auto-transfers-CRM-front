@@ -89,6 +89,7 @@ const TitleBidModal = ({ open, onClose }: TitleModalProps) => {
   return (
     <>
       <Dialog
+        data-testid='dialogTitleBidModal'
         open={open}
         onClose={onClose}
         component='form'

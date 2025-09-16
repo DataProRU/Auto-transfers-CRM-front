@@ -109,6 +109,7 @@ const RecieverBidModal = ({ open, onClose }: RecieverModalProps) => {
   return (
     <>
       <Dialog
+        data-testid='dialogRecieverBidModal'
         open={open}
         onClose={onClose}
         component='form'
@@ -198,6 +199,9 @@ const RecieverBidModal = ({ open, onClose }: RecieverModalProps) => {
                         error: !!error,
                         helperText: error?.message || ' ',
                         fullWidth: true,
+                        inputProps: {
+                          'data-testid': 'datePickerInput',
+                        },
                       },
                     }}
                   />
